@@ -9,15 +9,38 @@ class ProductController extends BaseController {
     }
 
     public function index() {
-        $products = $this->productModel->getAllProducts();
-        $categories = $this->categoryModel->getAll();
+        try {
+            $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+            $perPage = 6; // Thay đổi từ 9 xuống 6 sản phẩm mỗi trang
+            
+            // Gọi phương thức searchProducts với tham số mặc định
+            $result = $this->productModel->searchProducts('', [], $page, $perPage);
+            $categories = $this->categoryModel->getAll();
 
-        $this->view('layouts/main', [
-            'content' => 'product/index.php',
-            'title' => 'Tất cả sản phẩm',
-            'products' => $products,
-            'categories' => $categories
-        ]);
+            $this->view('layouts/main', [
+                'content' => 'product/index.php',
+                'title' => 'Tất cả sản phẩm',
+                'products' => $result['products'],
+                'categories' => $categories,
+                'keyword' => '',
+                'filters' => [],
+                'currentPage' => $result['currentPage'],
+                'totalPages' => $result['totalPages'],
+                'total' => $result['total']
+            ]);
+        } catch (Exception $e) {
+            error_log("Error in index: " . $e->getMessage());
+            $this->view('layouts/main', [
+                'content' => 'product/index.php',
+                'title' => 'Tất cả sản phẩm',
+                'products' => [],
+                'categories' => $this->categoryModel->getAll(),
+                'error' => 'Đã xảy ra lỗi khi tải sản phẩm',
+                'currentPage' => 1,
+                'totalPages' => 0,
+                'total' => 0
+            ]);
+        }
     }
 
     public function detail($params = []) {
@@ -68,17 +91,45 @@ class ProductController extends BaseController {
     }
 
     public function search() {
-        $keyword = $_GET['keyword'] ?? '';
-        $products = $this->productModel->searchProducts($keyword);
-        $categories = $this->categoryModel->getAll();
+        try {
+            $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+            $perPage = 6; // Thay đổi từ 9 xuống 6 sản phẩm mỗi trang
+            
+            $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+            $filters = [
+                'categories' => isset($_GET['category']) ? array_map('intval', (array)$_GET['category']) : [],
+                'price_range' => isset($_GET['price_range']) ? $_GET['price_range'] : '',
+                'sort' => isset($_GET['sort']) ? $_GET['sort'] : ''
+            ];
+            
+            $result = $this->productModel->searchProducts($keyword, $filters, $page, $perPage);
+            $categories = $this->categoryModel->getAll();
 
-        $this->view('layouts/main', [
-            'content' => 'products/index.php',
-            'title' => 'Kết quả tìm kiếm: ' . $keyword,
-            'products' => $products,
-            'categories' => $categories,
-            'keyword' => $keyword
-        ]);
+            $this->view('layouts/main', [
+                'content' => 'product/index.php',
+                'title' => $keyword ? 'Kết quả tìm kiếm: ' . htmlspecialchars($keyword) : 'Tất cả sản phẩm',
+                'products' => $result['products'],
+                'categories' => $categories,
+                'keyword' => $keyword,
+                'filters' => $filters,
+                'currentPage' => $result['currentPage'],
+                'totalPages' => $result['totalPages'],
+                'total' => $result['total']
+            ]);
+
+        } catch (Exception $e) {
+            error_log("Error in search: " . $e->getMessage());
+            $this->view('layouts/main', [
+                'content' => 'product/index.php',
+                'title' => 'Lỗi tìm kiếm',
+                'products' => [],
+                'categories' => $this->categoryModel->getAll(),
+                'error' => 'Đã xảy ra lỗi trong quá trình tìm kiếm',
+                'currentPage' => 1,
+                'totalPages' => 0,
+                'total' => 0
+            ]);
+        }
     }
 }
 ?> 

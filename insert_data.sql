@@ -23,6 +23,9 @@ INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho) VALUES
 ('Adidas Ultraboost', 1, 41, 3000000, 30),
 ('Clarks Oxford', 2, 43, 1800000, 20),
 ('Sandal Biti''s', 3, 40, 350000, 100),
+('Adidas Ultraboost', 1, 41, 3000000, 30),
+('Clarks Oxford', 2, 43, 1800000, 20),
+('Sandal Biti''s', 3, 40, 350000, 100),
 ('Giày cao gót Charles & Keith', 4, 38, 1200000, 25);
 
 -- Thêm dữ liệu cho bảng NhaCungCap

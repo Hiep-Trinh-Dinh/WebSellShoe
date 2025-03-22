@@ -1,96 +1,133 @@
 <div class="container py-8">
     <h1 class="text-3xl font-bold mb-8">Tất cả sản phẩm</h1>
 
+    <!-- Search Bar -->
+    <form action="<?php echo BASE_URL; ?>/products/search" method="GET" class="mb-8 max-w-2xl mx-auto">
+        <div class="flex gap-4">
+            <input type="text" 
+                   name="keyword" 
+                   placeholder="Tìm kiếm sản phẩm..." 
+                   value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>"
+                   class="flex-1 rounded-md border border-gray-300 px-4 py-2">
+            <button type="submit" 
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-md px-6 py-2">
+                Tìm kiếm
+            </button>
+        </div>
+    </form>
+
     <div class="flex flex-col md:flex-row gap-8">
         <!-- Filters Sidebar -->
         <div class="w-full md:w-64 shrink-0">
-            <div class="sticky top-24 rounded-lg border p-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-medium">Bộ lọc</h2>
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                    </svg>
-                </div>
+            <form action="<?php echo BASE_URL; ?>/products/search" method="GET" id="filterForm">
+                <input type="hidden" name="keyword" value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>">
+                
+                <div class="sticky top-24 rounded-lg border p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-medium">Bộ lọc</h2>
+                    </div>
 
-                <!-- Category Filter -->
-                <div class="border-t py-4">
-                    <button class="flex w-full items-center justify-between">
-                        <span class="font-medium">Danh mục</span>
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                    <div class="mt-2 space-y-1">
-                        <?php if (isset($categories) && !empty($categories)): ?>
-                            <?php foreach ($categories as $category): ?>
+                    <!-- Category Filter -->
+                    <div class="border-t py-4">
+                        <h3 class="font-medium mb-2">Danh mục</h3>
+                        <div class="space-y-1">
+                            <?php if (isset($categories) && !empty($categories)): ?>
+                                <?php foreach ($categories as $category): ?>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" 
+                                           name="category[]" 
+                                           value="<?php echo $category['maLoaiGiay']; ?>"
+                                           <?php 
+                                           if (isset($filters['categories']) && 
+                                               in_array($category['maLoaiGiay'], $filters['categories'])) {
+                                               echo 'checked';
+                                           }
+                                           ?>
+                                           class="rounded border-gray-300">
+                                    <span><?php echo htmlspecialchars($category['tenLoaiGiay']); ?></span>
+                                </label>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Price Filter -->
+                    <div class="border-t py-4">
+                        <h3 class="font-medium mb-2">Giá</h3>
+                        <div class="space-y-1">
                             <label class="flex items-center gap-2">
-                                <input type="checkbox" name="category[]" 
-                                       value="<?php echo $category['maLoaiGiay']; ?>" 
-                                       class="rounded border-gray-300">
-                                <span><?php echo htmlspecialchars($category['tenLoaiGiay']); ?></span>
-                                <span class="text-sm text-gray-500">
-                                    (<?php echo isset($category['product_count']) ? $category['product_count'] : '0'; ?>)
-                                </span>
+                                <input type="radio" name="price_range" value="0-500000" 
+                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '0-500000') ? 'checked' : ''; ?>>
+                                <span>Dưới 500.000đ</span>
                             </label>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <p class="text-sm text-gray-500">Không có danh mục nào</p>
-                        <?php endif; ?>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="price_range" value="500000-1000000"
+                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '500000-1000000') ? 'checked' : ''; ?>>
+                                <span>500.000đ - 1.000.000đ</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="price_range" value="1000000-2000000"
+                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '1000000-2000000') ? 'checked' : ''; ?>>
+                                <span>1.000.000đ - 2.000.000đ</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="price_range" value="2000000+"
+                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '2000000+') ? 'checked' : ''; ?>>
+                                <span>Trên 2.000.000đ</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Price Filter -->
-                <div class="border-t py-4">
-                    <button class="flex w-full items-center justify-between">
-                        <span class="font-medium">Giá</span>
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
+                    <!-- Sort Options -->
+                    <div class="border-t py-4">
+                        <h3 class="font-medium mb-2">Sắp xếp</h3>
+                        <select name="sort" class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm">
+                            <option value="">Mặc định</option>
+                            <option value="price_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_asc') ? 'selected' : ''; ?>>
+                                Giá: Thấp đến cao
+                            </option>
+                            <option value="price_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_desc') ? 'selected' : ''; ?>>
+                                Giá: Cao đến thấp
+                            </option>
+                            <option value="name_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_asc') ? 'selected' : ''; ?>>
+                                Tên: A-Z
+                            </option>
+                            <option value="name_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_desc') ? 'selected' : ''; ?>>
+                                Tên: Z-A
+                            </option>
+                            <option value="newest" <?php echo (isset($filters['sort']) && $filters['sort'] == 'newest') ? 'selected' : ''; ?>>
+                                Mới nhất
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-md px-4 py-2 font-medium">
+                        Áp dụng
                     </button>
-                    <div class="mt-2 space-y-1">
-                        <?php
-                        $priceRanges = [
-                            'Dưới 500.000đ',
-                            '500.000đ - 1.000.000đ',
-                            '1.000.000đ - 2.000.000đ',
-                            'Trên 2.000.000đ'
-                        ];
-                        foreach ($priceRanges as $range):
-                        ?>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" class="rounded border-gray-300">
-                            <span><?php echo $range; ?></span>
-                        </label>
-                        <?php endforeach; ?>
-                    </div>
                 </div>
-
-                <button class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-md px-4 py-2 font-medium">
-                    Áp dụng
-                </button>
-            </div>
+            </form>
         </div>
 
         <!-- Products Grid -->
         <div class="flex-1">
             <div class="mb-6 flex items-center justify-between">
-                <p class="text-sm text-gray-500">Hiển thị <?php echo count($products); ?> sản phẩm</p>
-                <select class="rounded-md border border-gray-300 px-3 py-1 text-sm">
-                    <option>Sắp xếp: Mặc định</option>
-                    <option>Giá: Thấp đến cao</option>
-                    <option>Giá: Cao đến thấp</option>
-                    <option>Mới nhất</option>
-                </select>
+                <p class="text-sm text-gray-500">
+                    <?php if (empty($products)): ?>
+                        Không tìm thấy sản phẩm nào
+                    <?php else: ?>
+                        Hiển thị <?php echo count($products); ?> sản phẩm
+                    <?php endif; ?>
+                </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($products as $product): ?>
-                <a href="<?php echo BASE_URL; ?>/products/detail/<?php echo $product['maGiay']; ?>" class="group">
+                <a href="<?php echo BASE_URL; ?>/products/detail/<?php echo $product->getMaGiay(); ?>" class="group">
                     <div class="overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
                         <div class="relative h-64 w-full overflow-hidden">
-                            <?php if ($product['hinhAnh']): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['hinhAnh']); ?>"
-                                     alt="<?php echo htmlspecialchars($product['tenGiay']); ?>"
+                            <?php if ($product->getHinhAnh()): ?>
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product->getHinhAnh()); ?>"
+                                     alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
                                      class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
                             <?php else: ?>
                                 <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
@@ -98,11 +135,11 @@
                                      class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
                             <?php endif; ?>
                             <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
-                                <?php echo htmlspecialchars($product['tenLoaiGiay']); ?>
+                                <?php echo htmlspecialchars($product->getTenLoaiGiay()); ?>
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-medium"><?php echo htmlspecialchars($product['tenGiay']); ?></h3>
+                            <h3 class="font-medium"><?php echo htmlspecialchars($product->getTenGiay()); ?></h3>
                             <div class="mt-1 flex items-center">
                                 <?php for ($i = 0; $i < 5; $i++): ?>
                                     <svg class="h-4 w-4 <?php echo $i < 4 ? 'text-yellow-500 fill-yellow-500' : 'text-gray-200 fill-gray-200'; ?>" viewBox="0 0 24 24">
@@ -112,8 +149,11 @@
                                 <span class="ml-2 text-sm text-gray-500">(<?php echo rand(10, 100); ?>)</span>
                             </div>
                             <div class="mt-3 flex items-center justify-between">
-                                <span class="font-bold"><?php echo number_format($product['giaBan'], 0, ',', '.'); ?>đ</span>
-                                <button class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-600">
+                                <span class="font-bold">
+                                    <?php echo number_format($product->getGiaBan(), 0, ',', '.'); ?>đ
+                                </span>
+                                <button onclick="addToCart(<?php echo $product->getMaGiay(); ?>, event)" 
+                                        class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-600">
                                     Thêm vào giỏ
                                 </button>
                             </div>
@@ -124,15 +164,39 @@
             </div>
 
             <!-- Pagination -->
+            <?php 
+            $currentPage = $currentPage ?? 1;
+            $totalPages = $totalPages ?? 0;
+            $keyword = $keyword ?? '';
+            ?>
+
+            <?php if ($totalPages > 1): ?>
             <div class="mt-8 flex justify-center">
                 <nav class="flex items-center gap-1">
-                    <button class="rounded-md border px-3 py-2 text-sm" disabled>&lt;</button>
-                    <button class="rounded-md bg-yellow-500 px-3 py-2 text-sm text-white">1</button>
-                    <button class="rounded-md border px-3 py-2 text-sm">2</button>
-                    <button class="rounded-md border px-3 py-2 text-sm">3</button>
-                    <button class="rounded-md border px-3 py-2 text-sm">&gt;</button>
+                    <!-- Previous Button -->
+                    <a href="?page=<?php echo max(1, $currentPage - 1); ?>&keyword=<?php echo urlencode($keyword); ?>" 
+                       class="rounded-md border px-3 py-2 text-sm <?php echo $currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'; ?>"
+                       <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>>
+                        &lt;
+                    </a>
+                    
+                    <!-- Page Numbers -->
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>" 
+                           class="rounded-md <?php echo $i === $currentPage ? 'bg-yellow-500 text-white' : 'border hover:bg-gray-100'; ?> px-3 py-2 text-sm">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                    
+                    <!-- Next Button -->
+                    <a href="?page=<?php echo min($totalPages, $currentPage + 1); ?>&keyword=<?php echo urlencode($keyword); ?>" 
+                       class="rounded-md border px-3 py-2 text-sm <?php echo $currentPage >= $totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'; ?>"
+                       <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>>
+                        &gt;
+                    </a>
                 </nav>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -164,4 +228,15 @@ function addToCart(productId, event) {
         alert('Có lỗi xảy ra');
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý sắp xếp
+    const sortSelect = document.querySelector('select[name="sort"]');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            // Hiển thị loading state nếu muốn
+            document.getElementById('filterForm').submit();
+        });
+    }
+});
 </script> 

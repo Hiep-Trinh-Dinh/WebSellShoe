@@ -1,7 +1,67 @@
 <?php
 class Product extends BaseModel {
     protected $table = 'Giay';
+    
+    // Định nghĩa các thuộc tính
+    protected $maGiay;
+    protected $tenGiay;
+    protected $maLoaiGiay;
+    protected $size;
+    protected $giaBan;
+    protected $tonKho;
+    protected $hinhAnh;
+    protected $tenLoaiGiay; // Thuộc tính phụ từ bảng LoaiGiay
 
+    // Getters
+    public function getMaGiay() { return $this->maGiay; }
+    public function getTenGiay() { return $this->tenGiay; }
+    public function getMaLoaiGiay() { return $this->maLoaiGiay; }
+    public function getSize() { return $this->size; }
+    public function getGiaBan() { return $this->giaBan; }
+    public function getTonKho() { return $this->tonKho; }
+    public function getHinhAnh() { return $this->hinhAnh; }
+    public function getTenLoaiGiay() { return $this->tenLoaiGiay; }
+
+    // Setters
+    public function setMaGiay($maGiay) { $this->maGiay = $maGiay; }
+    public function setTenGiay($tenGiay) { $this->tenGiay = $tenGiay; }
+    public function setMaLoaiGiay($maLoaiGiay) { $this->maLoaiGiay = $maLoaiGiay; }
+    public function setSize($size) { $this->size = $size; }
+    public function setGiaBan($giaBan) { $this->giaBan = $giaBan; }
+    public function setTonKho($tonKho) { $this->tonKho = $tonKho; }
+    public function setHinhAnh($hinhAnh) { $this->hinhAnh = $hinhAnh; }
+    public function setTenLoaiGiay($tenLoaiGiay) { $this->tenLoaiGiay = $tenLoaiGiay; }
+
+    // Chuyển đổi từ array sang object
+    public function mapFromArray($data) {
+        if (!empty($data)) {
+            $this->maGiay = $data['maGiay'] ?? null;
+            $this->tenGiay = $data['tenGiay'] ?? null;
+            $this->maLoaiGiay = $data['maLoaiGiay'] ?? null;
+            $this->size = $data['size'] ?? null;
+            $this->giaBan = $data['giaBan'] ?? null;
+            $this->tonKho = $data['tonKho'] ?? null;
+            $this->hinhAnh = $data['hinhAnh'] ?? null;
+            $this->tenLoaiGiay = $data['tenLoaiGiay'] ?? null;
+        }
+        return $this;
+    }
+
+    // Chuyển đổi object sang array
+    public function toArray() {
+        return [
+            'maGiay' => $this->maGiay,
+            'tenGiay' => $this->tenGiay,
+            'maLoaiGiay' => $this->maLoaiGiay,
+            'size' => $this->size,
+            'giaBan' => $this->giaBan,
+            'tonKho' => $this->tonKho,
+            'hinhAnh' => $this->hinhAnh,
+            'tenLoaiGiay' => $this->tenLoaiGiay
+        ];
+    }
+
+    // Các phương thức truy vấn
     public function getAllProducts() {
         $sql = "SELECT g.*, lg.tenLoaiGiay 
                 FROM Giay g 
@@ -9,7 +69,13 @@ class Product extends BaseModel {
                 ORDER BY g.maGiay DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $products = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $product = new Product();
+            $product->mapFromArray($row);
+            $products[] = $product;
+        }
+        return $products;
     }
 
     public function getProductsByCategory($categoryId) {
@@ -31,7 +97,11 @@ class Product extends BaseModel {
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            return $this->mapFromArray($row);
+        }
+        return null;
     }
 
     public function getRelatedProducts($categoryId, $currentProductId, $limit = 4) {
@@ -49,15 +119,153 @@ class Product extends BaseModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function searchProducts($keyword) {
-        $sql = "SELECT g.*, lg.tenLoaiGiay 
-                FROM Giay g 
-                LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
-                WHERE g.tenGiay LIKE :keyword";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':keyword', "%$keyword%", PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function searchProducts($keyword, $filters = [], $page = 1, $perPage = 9) {
+        try {
+            // Đầu tiên đếm tổng số sản phẩm
+            $countSql = "SELECT COUNT(*) as total FROM Giay g 
+                         LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
+                         WHERE 1=1";
+            
+            $sql = "SELECT g.*, lg.tenLoaiGiay 
+                    FROM Giay g 
+                    LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
+                    WHERE 1=1";
+                    
+            $params = [];
+            
+            // Thêm điều kiện tìm kiếm
+            if (!empty($keyword)) {
+                $searchTerm = trim(mb_strtolower($keyword, 'UTF-8'));
+                $searchConditions = [];
+                
+                for ($i = 0; $i < mb_strlen($searchTerm, 'UTF-8'); $i++) {
+                    $char = mb_substr($searchTerm, $i, 1, 'UTF-8');
+                    if ($char !== ' ') {
+                        $key = ":char{$i}";
+                        $searchConditions[] = "LOWER(g.tenGiay) LIKE {$key}";
+                        $params[$key] = "%{$char}%";
+                    }
+                }
+                
+                if (!empty($searchConditions)) {
+                    $whereClause = " AND (" . implode(' AND ', $searchConditions) . ")";
+                    $sql .= $whereClause;
+                    $countSql .= $whereClause;
+                }
+            }
+            
+            // Thêm các điều kiện lọc khác
+            if (!empty($filters['categories'])) {
+                $categories = array_filter($filters['categories'], function($value) {
+                    return !empty($value) && is_numeric($value);
+                });
+                
+                if (!empty($categories)) {
+                    $placeholders = array_map(function($i) { 
+                        return ':category' . $i;
+                    }, array_keys($categories));
+                    
+                    $categoryClause = " AND g.maLoaiGiay IN (" . implode(',', $placeholders) . ")";
+                    $sql .= $categoryClause;
+                    $countSql .= $categoryClause;
+                    
+                    foreach ($categories as $i => $categoryId) {
+                        $params[':category' . $i] = $categoryId;
+                    }
+                }
+            }
+            
+            // Thêm điều kiện lọc giá
+            if (!empty($filters['price_range'])) {
+                $priceClause = "";
+                switch ($filters['price_range']) {
+                    case '0-500000':
+                        $priceClause = " AND g.giaBan < 500000";
+                        break;
+                    case '500000-1000000':
+                        $priceClause = " AND g.giaBan BETWEEN 500000 AND 1000000";
+                        break;
+                    case '1000000-2000000':
+                        $priceClause = " AND g.giaBan BETWEEN 1000000 AND 2000000";
+                        break;
+                    case '2000000+':
+                        $priceClause = " AND g.giaBan > 2000000";
+                        break;
+                }
+                $sql .= $priceClause;
+                $countSql .= $priceClause;
+            }
+            
+            // Thêm sắp xếp
+            if (!empty($filters['sort'])) {
+                switch ($filters['sort']) {
+                    case 'price_asc':
+                        $sql .= " ORDER BY g.giaBan ASC";
+                        break;
+                    case 'price_desc':
+                        $sql .= " ORDER BY g.giaBan DESC";
+                        break;
+                    case 'name_asc':
+                        $sql .= " ORDER BY g.tenGiay ASC";
+                        break;
+                    case 'name_desc':
+                        $sql .= " ORDER BY g.tenGiay DESC";
+                        break;
+                    case 'newest':
+                        $sql .= " ORDER BY g.maGiay DESC";
+                        break;
+                    default:
+                        $sql .= " ORDER BY g.maGiay DESC";
+                }
+            } else {
+                $sql .= " ORDER BY g.maGiay DESC";
+            }
+            
+            // Thêm LIMIT và OFFSET cho phân trang
+            $sql .= " LIMIT :limit OFFSET :offset";
+            
+            // Đếm tổng số sản phẩm
+            $countStmt = $this->db->prepare($countSql);
+            foreach ($params as $key => $value) {
+                $countStmt->bindValue($key, $value);
+            }
+            $countStmt->execute();
+            $totalProducts = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Thêm params cho phân trang
+            $params[':limit'] = $perPage;
+            $params[':offset'] = ($page - 1) * $perPage;
+            
+            // Thực hiện truy vấn chính
+            $stmt = $this->db->prepare($sql);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            $stmt->execute();
+            
+            $products = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $product = new Product();
+                $product->mapFromArray($row);
+                $products[] = $product;
+            }
+            
+            return [
+                'products' => $products,
+                'total' => $totalProducts,
+                'totalPages' => ceil($totalProducts / $perPage),
+                'currentPage' => $page
+            ];
+
+        } catch (PDOException $e) {
+            error_log("Error in searchProducts: " . $e->getMessage());
+            return [
+                'products' => [],
+                'total' => 0,
+                'totalPages' => 0,
+                'currentPage' => 1
+            ];
+        }
     }
 
     public function getAll() {
