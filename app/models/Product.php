@@ -90,18 +90,25 @@ class Product extends BaseModel {
     }
 
     public function getProductById($id) {
-        $sql = "SELECT g.*, lg.tenLoaiGiay 
-                FROM Giay g 
-                LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
-                WHERE g.maGiay = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            return $this->mapFromArray($row);
+        try {
+            $sql = "SELECT g.*, lg.tenLoaiGiay 
+                    FROM Giay g 
+                    LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
+                    WHERE g.maGiay = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($data) {
+                $product = new Product();
+                return $product->mapFromArray($data);
+            }
+            return null;
+        } catch (PDOException $e) {
+            error_log("Error in getProductById: " . $e->getMessage());
+            throw $e;
         }
-        return null;
     }
 
     public function getRelatedProducts($categoryId, $currentProductId, $limit = 4) {

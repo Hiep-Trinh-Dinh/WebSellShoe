@@ -16,7 +16,7 @@ class UserController extends BaseController {
 
     public function index() {
         $userId = $_SESSION['user_id'];
-        $user = $this->userModel->getUserById($userId);
+        $user = $this->userModel->getById($userId);
         $orders = $this->orderModel->getOrdersByUserId($userId);
         
         $this->view('layouts/main', [

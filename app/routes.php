@@ -10,7 +10,11 @@ class Routes {
         'logout' => ['controller' => 'AuthController', 'action' => 'logout'],
         // Sản phẩm
         'products' => ['controller' => 'ProductController', 'action' => 'index'],
-        'products/detail/([0-9]+)' => ['controller' => 'ProductController', 'action' => 'detail', 'params' => ['id']],
+        'products/detail/([0-9]+)' => [
+            'controller' => 'ProductController',
+            'action' => 'detail',
+            'params' => ['id']
+        ],
         'products/category' => ['controller' => 'ProductController', 'action' => 'category'],
         'products/search' => ['controller' => 'ProductController', 'action' => 'search'],
         

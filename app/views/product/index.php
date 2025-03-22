@@ -122,44 +122,39 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($products as $product): ?>
-                <a href="<?php echo BASE_URL; ?>/products/detail/<?php echo $product->getMaGiay(); ?>" class="group">
-                    <div class="overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
-                        <div class="relative h-64 w-full overflow-hidden">
+                <div class="group relative">
+                    <a href="<?php echo BASE_URL . '/products/detail/' . $product->getMaGiay(); ?>" 
+                       class="block overflow-hidden rounded-lg bg-white shadow-md hover:shadow-lg">
+                        <div class="aspect-square overflow-hidden">
                             <?php if ($product->getHinhAnh()): ?>
                                 <img src="data:image/jpeg;base64,<?php echo base64_encode($product->getHinhAnh()); ?>"
                                      alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
-                                     class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
+                                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                             <?php else: ?>
                                 <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
                                      alt="No Image"
-                                     class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
+                                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
                             <?php endif; ?>
-                            <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
-                                <?php echo htmlspecialchars($product->getTenLoaiGiay()); ?>
-                            </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-medium"><?php echo htmlspecialchars($product->getTenGiay()); ?></h3>
-                            <div class="mt-1 flex items-center">
-                                <?php for ($i = 0; $i < 5; $i++): ?>
-                                    <svg class="h-4 w-4 <?php echo $i < 4 ? 'text-yellow-500 fill-yellow-500' : 'text-gray-200 fill-gray-200'; ?>" viewBox="0 0 24 24">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                <?php endfor; ?>
-                                <span class="ml-2 text-sm text-gray-500">(<?php echo rand(10, 100); ?>)</span>
-                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">
+                                <?php echo htmlspecialchars($product->getTenGiay()); ?>
+                            </h3>
+                            <p class="mt-1 text-gray-500">
+                                <?php echo htmlspecialchars($product->getTenLoaiGiay()); ?>
+                            </p>
                             <div class="mt-3 flex items-center justify-between">
-                                <span class="font-bold">
+                                <p class="text-lg font-medium text-yellow-500">
                                     <?php echo number_format($product->getGiaBan(), 0, ',', '.'); ?>đ
-                                </span>
-                                <button onclick="addToCart(<?php echo $product->getMaGiay(); ?>, event)" 
-                                        class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-600">
+                                </p>
+                                <button onclick="event.stopPropagation(); addToCart(<?php echo $product->getMaGiay(); ?>)" 
+                                        class="rounded-md bg-yellow-500 px-3 py-2 text-sm text-white hover:bg-yellow-600">
                                     Thêm vào giỏ
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
                 <?php endforeach; ?>
             </div>
 

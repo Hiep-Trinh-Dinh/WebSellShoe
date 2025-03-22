@@ -5,12 +5,12 @@
             <div class="rounded-lg border p-4">
                 <div class="flex items-center gap-4">
                     <div class="h-12 w-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
-                        <?php echo strtoupper(substr($user['tenTK'], 0, 1)); ?>
+                        <?php echo strtoupper(substr($user->getTenTK(), 0, 1)); ?>
                     </div>
                     <div>
-                        <p class="font-medium"><?php echo htmlspecialchars($user['tenTK']); ?></p>
+                        <p class="font-medium"><?php echo htmlspecialchars($user->getTenTK()); ?></p>
                         <p class="text-sm text-gray-500">
-                            <?php echo $user['maQuyen'] == 1 ? 'Quản trị viên' : 'Thành viên'; ?>
+                            <?php echo $user->getMaQuyen() == 1 ? 'Quản trị viên' : 'Thành viên'; ?>
                         </p>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                     <div class="grid gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-2">Tên đăng nhập</label>
-                            <input type="text" value="<?php echo htmlspecialchars($user['tenTK']); ?>"
+                            <input type="text" value="<?php echo htmlspecialchars($user->getTenTK()); ?>"
                                    class="w-full rounded-md border px-3 py-2" readonly>
                         </div>
                         <div>
@@ -85,8 +85,8 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">Trạng thái tài khoản</label>
-                            <span class="<?php echo $user['trangThai'] == 1 ? 'text-green-500' : 'text-red-500'; ?>">
-                                <?php echo $user['trangThai'] == 1 ? 'Đang hoạt động' : 'Đã khóa'; ?>
+                            <span class="<?php echo $user->getTrangThai() == 1 ? 'text-green-500' : 'text-red-500'; ?>">
+                                <?php echo $user->getTrangThai() == 1 ? 'Đang hoạt động' : 'Đã khóa'; ?>
                             </span>
                         </div>
                     </div>

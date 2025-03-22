@@ -1,6 +1,56 @@
 <?php
 class User extends BaseModel {
     protected $table = 'TaiKhoan';
+    
+    // Định nghĩa các thuộc tính
+    protected $maTK;
+    protected $tenTK;
+    protected $matKhau;
+    protected $hoTen;
+    protected $email;
+    protected $soDienThoai;
+    protected $diaChi;
+    protected $maQuyen;
+    protected $trangThai;
+    protected $tenQuyen; // từ bảng Quyen
+
+    // Getters
+    public function getMaTK() { return $this->maTK; }
+    public function getTenTK() { return $this->tenTK; }
+    public function getMatKhau() { return $this->matKhau; }
+    public function getHoTen() { return $this->hoTen; }
+    public function getEmail() { return $this->email; }
+    public function getSoDienThoai() { return $this->soDienThoai; }
+    public function getDiaChi() { return $this->diaChi; }
+    public function getMaQuyen() { return $this->maQuyen; }
+    public function getTrangThai() { return $this->trangThai; }
+    public function getTenQuyen() { return $this->tenQuyen; }
+
+    // Setters
+    public function setMaTK($value) { $this->maTK = $value; }
+    public function setTenTK($value) { $this->tenTK = $value; }
+    public function setMatKhau($value) { $this->matKhau = $value; }
+    public function setHoTen($value) { $this->hoTen = $value; }
+    public function setEmail($value) { $this->email = $value; }
+    public function setSoDienThoai($value) { $this->soDienThoai = $value; }
+    public function setDiaChi($value) { $this->diaChi = $value; }
+    public function setMaQuyen($value) { $this->maQuyen = $value; }
+    public function setTrangThai($value) { $this->trangThai = $value; }
+    public function setTenQuyen($value) { $this->tenQuyen = $value; }
+
+    // Phương thức map dữ liệu từ array sang object
+    public function mapFromArray($data) {
+        $this->maTK = $data['maTK'] ?? null;
+        $this->tenTK = $data['tenTK'] ?? null;
+        $this->matKhau = $data['matKhau'] ?? null;
+        $this->hoTen = $data['hoTen'] ?? null;
+        $this->email = $data['email'] ?? null;
+        $this->soDienThoai = $data['soDienThoai'] ?? null;
+        $this->diaChi = $data['diaChi'] ?? null;
+        $this->maQuyen = $data['maQuyen'] ?? null;
+        $this->trangThai = $data['trangThai'] ?? null;
+        $this->tenQuyen = $data['tenQuyen'] ?? null;
+    }
 
     public function getAll() {
         $sql = "SELECT tk.*, q.tenQuyen 
@@ -20,7 +70,14 @@ class User extends BaseModel {
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($data) {
+            $user = new User();
+            $user->mapFromArray($data);
+            return $user;
+        }
+        return null;
     }
 
     public function add($data) {
@@ -88,11 +145,21 @@ class User extends BaseModel {
     }
 
     public function getUserByUsername($username) {
-        $sql = "SELECT * FROM TaiKhoan WHERE tenTK = :username";
+        $sql = "SELECT tk.*, q.tenQuyen 
+                FROM TaiKhoan tk 
+                LEFT JOIN Quyen q ON tk.maQuyen = q.maQuyen 
+                WHERE tk.tenTK = :username";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':username', $username);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($data) {
+            $user = new User();
+            $user->mapFromArray($data);
+            return $user;
+        }
+        return null;
     }
 
     public function createUser($data) {
@@ -120,13 +187,13 @@ class User extends BaseModel {
                 WHERE maTK = :id";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':hoTen', $data['hoTen']);
-        $stmt->bindParam(':email', $data['email']);
-        $stmt->bindParam(':soDienThoai', $data['soDienThoai']);
-        $stmt->bindParam(':diaChi', $data['diaChi']);
-        
-        return $stmt->execute();
+        return $stmt->execute([
+            ':id' => $id,
+            ':hoTen' => $data['hoTen'],
+            ':email' => $data['email'],
+            ':soDienThoai' => $data['soDienThoai'],
+            ':diaChi' => $data['diaChi']
+        ]);
     }
 
     public function getUserByEmail($email) {

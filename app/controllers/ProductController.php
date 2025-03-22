@@ -44,31 +44,57 @@ class ProductController extends BaseController {
     }
 
     public function detail($params = []) {
-        $id = isset($params['id']) ? $params['id'] : null;
-        
-        if (!$id) {
+        try {
+            // Debug
+            error_log("Detail method called with params: " . print_r($params, true));
+            
+            // Lấy ID sản phẩm từ params
+            $id = isset($params[0]) ? $params[0] : null;
+            
+            if (!$id) {
+                throw new Exception('Product ID not provided');
+            }
+
+            // Debug
+            error_log("Fetching product with ID: " . $id);
+            
+            $product = $this->productModel->getProductById($id);
+            
+            if (!$product) {
+                throw new Exception('Product not found');
+            }
+
+            // Debug
+            error_log("Product found: " . print_r($product->toArray(), true));
+
+            // Lấy loại giày của sản phẩm
+            $category = $this->categoryModel->getById($product->getMaLoaiGiay());
+            if ($category) {
+                $product->setTenLoaiGiay($category['tenLoaiGiay']);
+            }
+
+            // Lấy sản phẩm liên quan
+            $relatedProducts = $this->productModel->getRelatedProducts(
+                $product->getMaLoaiGiay(),
+                $product->getMaGiay()
+            );
+
+            $this->view('layouts/main', [
+                'content' => 'product/detail.php',
+                'title' => $product->getTenGiay(),
+                'product' => $product,
+                'relatedProducts' => $relatedProducts
+            ]);
+            
+        } catch (Exception $e) {
+            // Log error
+            error_log("Error in ProductController::detail - " . $e->getMessage());
+            
+            // Redirect to products page with error message
+            $_SESSION['error'] = 'Không tìm thấy sản phẩm';
             header('Location: ' . BASE_URL . '/products');
             exit();
         }
-
-        $product = $this->productModel->getProductById($id);
-        
-        if (!$product) {
-            header('Location: ' . BASE_URL . '/products');
-            exit();
-        }
-
-        // Lấy loại giày của sản phẩm
-        $category = $this->categoryModel->getById($product['maLoaiGiay']);
-        if ($category) {
-            $product['tenLoaiGiay'] = $category['tenLoaiGiay'];
-        }
-
-        $this->view('layouts/main', [
-            'content' => 'product/detail.php',
-            'title' => $product['tenGiay'],
-            'product' => $product
-        ]);
     }
 
     public function category($id = null) {

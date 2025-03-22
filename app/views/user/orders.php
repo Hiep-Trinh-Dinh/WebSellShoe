@@ -17,17 +17,17 @@
                     <div class="p-4">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <p class="font-medium">Đơn hàng #<?php echo $order['maHD']; ?></p>
+                                <p class="font-medium">Đơn hàng #<?php echo $order->getMaHD(); ?></p>
                                 <p class="text-sm text-gray-500">
-                                    Ngày đặt: <?php echo date('d/m/Y', strtotime($order['ngayTao'])); ?>
+                                    Ngày đặt: <?php echo date('d/m/Y', strtotime($order->getNgayTao())); ?>
                                 </p>
                             </div>
                             <div class="text-right">
                                 <p class="font-medium">
-                                    <?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ
+                                    <?php echo number_format($order->getTongTien(), 0, ',', '.'); ?>đ
                                 </p>
                                 <p class="text-sm <?php 
-                                    switch($order['trangThai']) {
+                                    switch($order->getTrangThai()) {
                                         case 0:
                                             echo 'text-yellow-500">Chờ xử lý';
                                             break;
@@ -48,9 +48,9 @@
                         </div>
 
                         <!-- Order Items -->
-                        <?php if (!empty($order['items'])): ?>
+                        <?php if (!empty($order->getItems())): ?>
                             <div class="space-y-3">
-                                <?php foreach ($order['items'] as $item): ?>
+                                <?php foreach ($order->getItems() as $item): ?>
                                 <div class="flex gap-4">
                                     <div class="h-20 w-20 flex-shrink-0">
                                         <?php if ($item['hinhAnh']): ?>
