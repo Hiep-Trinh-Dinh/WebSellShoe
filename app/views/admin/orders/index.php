@@ -1,0 +1,93 @@
+<div class="bg-white shadow rounded-lg">
+    <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold">Danh sách đơn hàng</h2>
+    </div>
+    
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left">
+                        <th class="pb-4">Mã ĐH</th>
+                        <th class="pb-4">Khách hàng</th>
+                        <th class="pb-4">Ngày tạo</th>
+                        <th class="pb-4">Tổng tiền</th>
+                        <th class="pb-4">Trạng thái</th>
+                        <th class="pb-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($orders)): ?>
+                        <?php foreach ($orders as $order): ?>
+                        <tr class="border-t">
+                            <td class="py-4">#<?php echo $order['maHD']; ?></td>
+                            <td class="py-4"><?php echo htmlspecialchars($order['tenTK'] ?? 'Khách vãng lai'); ?></td>
+                            <td class="py-4"><?php echo date('d/m/Y H:i', strtotime($order['ngayTao'])); ?></td>
+                            <td class="py-4"><?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ</td>
+                            <td class="py-4">
+                                <select onchange="updateOrderStatus(<?php echo $order['maHD']; ?>, this.value)"
+                                        class="rounded-full px-3 py-1 text-sm 
+                                        <?php
+                                        switch($order['trangThai']) {
+                                            case 0:
+                                                echo 'bg-yellow-100 text-yellow-800';
+                                                break;
+                                            case 1:
+                                                echo 'bg-blue-100 text-blue-800';
+                                                break;
+                                            case 2:
+                                                echo 'bg-green-100 text-green-800';
+                                                break;
+                                            case 3:
+                                                echo 'bg-red-100 text-red-800';
+                                                break;
+                                        }
+                                        ?>">
+                                    <option value="0" <?php echo $order['trangThai'] == 0 ? 'selected' : ''; ?>>Chờ xử lý</option>
+                                    <option value="1" <?php echo $order['trangThai'] == 1 ? 'selected' : ''; ?>>Đang giao</option>
+                                    <option value="2" <?php echo $order['trangThai'] == 2 ? 'selected' : ''; ?>>Đã giao</option>
+                                    <option value="3" <?php echo $order['trangThai'] == 3 ? 'selected' : ''; ?>>Đã hủy</option>
+                                </select>
+                            </td>
+                            <td class="py-4">
+                                <a href="<?php echo BASE_URL; ?>/admin/orders/viewOrder/<?php echo $order['maHD']; ?>" 
+                                   class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-eye"></i> Xem
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="py-4 text-center text-gray-500">Không có đơn hàng nào</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateOrderStatus(orderId, status) {
+    fetch(`${BASE_URL}/admin/orders/update-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `orderId=${orderId}&status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra');
+    });
+}
+</script> 

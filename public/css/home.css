@@ -1,0 +1,64 @@
+/* Hero Section */
+.hero {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    padding: 4rem 0;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.hero .lead {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.hero img {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+/* Featured Products */
+.featured-products {
+    padding: 3rem 0;
+}
+
+.featured-products h2 {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #333;
+    position: relative;
+}
+
+.featured-products h2:after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: #007bff;
+    margin: 1rem auto;
+}
+
+/* Product Cards */
+.product-card {
+    margin-bottom: 2rem;
+}
+
+.product-card .card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.product-card .price {
+    color: #28a745;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.product-card .stock-status {
+    font-size: 0.9rem;
+    color: #6c757d;
+} 

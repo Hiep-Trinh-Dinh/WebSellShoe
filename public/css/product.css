@@ -1,0 +1,94 @@
+/* Product List */
+.product-list {
+    padding: 2rem 0;
+}
+
+.product-list .card {
+    height: 100%;
+}
+
+.product-list .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Product Detail */
+.product-detail {
+    padding: 2rem 0;
+}
+
+.product-detail .product-image {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-detail h1 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.product-detail .price {
+    font-size: 1.5rem;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+
+.product-detail .description {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+/* Size Selection */
+.size-selector {
+    margin-bottom: 2rem;
+}
+
+.size-selector .btn-check:checked + .btn-outline-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Quantity Selector */
+.quantity-selector {
+    width: 150px;
+    margin-bottom: 2rem;
+}
+
+.quantity-selector input {
+    text-align: center;
+}
+
+/* Product Info Card */
+.product-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.product-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.product-info li {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+/* Search Form */
+.search-form {
+    margin-bottom: 2rem;
+}
+
+.search-form .form-control {
+    border-radius: 20px;
+    padding-left: 1.5rem;
+}
+
+.search-form .btn {
+    border-radius: 20px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+} 

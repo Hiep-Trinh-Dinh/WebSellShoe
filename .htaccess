@@ -1,0 +1,15 @@
+RewriteEngine On
+RewriteBase /Web2/
+
+# Không rewrite cho các file và thư mục thực tế
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite tất cả các request đến index.php
+RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+
+# Rewrite cho trang chủ
+RewriteRule ^$ index.php?url=home [L]
+
+# Cho phép truy cập trực tiếp các file trong thư mục public
+RewriteRule ^public/ - [L]
