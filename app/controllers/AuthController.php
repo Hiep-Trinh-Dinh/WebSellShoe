@@ -26,15 +26,15 @@ class AuthController extends BaseController {
             
             $user = $this->userModel->getUserByUsername($username);
             
-            if ($user && $user['matKhau'] === $password && $user['trangThai'] == 1) {
+            if ($user && $user->getMatKhau() === $password && $user->getTrangThai() == 1) {
                 // Đăng nhập thành công
-                $_SESSION['user_id'] = $user['maTK'];
-                $_SESSION['username'] = $user['tenTK'];
-                $_SESSION['user_role'] = $user['maQuyen'];
+                $_SESSION['user_id'] = $user->getMaTK();
+                $_SESSION['username'] = $user->getTenTK();
+                $_SESSION['user_role'] = $user->getMaQuyen();
                 $_SESSION['success'] = 'Đăng nhập thành công!';
                 
                 // Chuyển hướng dựa vào quyền
-                if ($user['maQuyen'] == 1) {
+                if ($user->getMaQuyen() == 1) {
                     header('Location: ' . BASE_URL . '/admin');
                 } else {
                     header('Location: ' . BASE_URL);

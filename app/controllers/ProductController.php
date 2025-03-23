@@ -119,7 +119,7 @@ class ProductController extends BaseController {
     public function search() {
         try {
             $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-            $perPage = 6; // Thay đổi từ 9 xuống 6 sản phẩm mỗi trang
+            $perPage = 6;
             
             $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
             $filters = [
@@ -138,7 +138,7 @@ class ProductController extends BaseController {
                 'categories' => $categories,
                 'keyword' => $keyword,
                 'filters' => $filters,
-                'currentPage' => $result['currentPage'],
+                'currentPage' => $page,
                 'totalPages' => $result['totalPages'],
                 'total' => $result['total']
             ]);

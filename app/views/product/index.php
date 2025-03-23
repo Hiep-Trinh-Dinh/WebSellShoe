@@ -20,88 +20,72 @@
         <!-- Filters Sidebar -->
         <div class="w-full md:w-64 shrink-0">
             <form action="<?php echo BASE_URL; ?>/products/search" method="GET" id="filterForm">
+                <!-- Giữ lại keyword nếu có -->
                 <input type="hidden" name="keyword" value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>">
+                <!-- Giữ lại trang hiện tại -->
+                <input type="hidden" name="page" value="<?php echo isset($currentPage) ? $currentPage : 1; ?>">
                 
                 <div class="sticky top-24 rounded-lg border p-4">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="font-medium">Bộ lọc</h2>
+                        <button type="reset" class="text-sm text-gray-500 hover:text-gray-700">Đặt lại</button>
                     </div>
 
                     <!-- Category Filter -->
                     <div class="border-t py-4">
                         <h3 class="font-medium mb-2">Danh mục</h3>
-                        <div class="space-y-1">
-                            <?php if (isset($categories) && !empty($categories)): ?>
-                                <?php foreach ($categories as $category): ?>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" 
-                                           name="category[]" 
-                                           value="<?php echo $category['maLoaiGiay']; ?>"
-                                           <?php 
-                                           if (isset($filters['categories']) && 
-                                               in_array($category['maLoaiGiay'], $filters['categories'])) {
-                                               echo 'checked';
-                                           }
-                                           ?>
-                                           class="rounded border-gray-300">
-                                    <span><?php echo htmlspecialchars($category['tenLoaiGiay']); ?></span>
-                                </label>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                        <?php foreach ($categories as $category): ?>
+                        <label class="flex items-center gap-2 py-1">
+                            <input type="checkbox" 
+                                   name="category[]" 
+                                   value="<?php echo $category['maLoaiGiay']; ?>"
+                                   <?php echo (isset($filters['categories']) && in_array($category['maLoaiGiay'], $filters['categories'])) ? 'checked' : ''; ?>>
+                            <span><?php echo htmlspecialchars($category['tenLoaiGiay']); ?></span>
+                        </label>
+                        <?php endforeach; ?>
                     </div>
 
-                    <!-- Price Filter -->
+                    <!-- Price Range Filter -->
                     <div class="border-t py-4">
-                        <h3 class="font-medium mb-2">Giá</h3>
-                        <div class="space-y-1">
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="price_range" value="0-500000" 
-                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '0-500000') ? 'checked' : ''; ?>>
-                                <span>Dưới 500.000đ</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="price_range" value="500000-1000000"
-                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '500000-1000000') ? 'checked' : ''; ?>>
-                                <span>500.000đ - 1.000.000đ</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="price_range" value="1000000-2000000"
-                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '1000000-2000000') ? 'checked' : ''; ?>>
-                                <span>1.000.000đ - 2.000.000đ</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="price_range" value="2000000+"
-                                       <?php echo (isset($filters['price_range']) && $filters['price_range'] == '2000000+') ? 'checked' : ''; ?>>
-                                <span>Trên 2.000.000đ</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Sort Options -->
-                    <div class="border-t py-4">
-                        <h3 class="font-medium mb-2">Sắp xếp</h3>
-                        <select name="sort" class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm">
-                            <option value="">Mặc định</option>
-                            <option value="price_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_asc') ? 'selected' : ''; ?>>
-                                Giá: Thấp đến cao
+                        <h3 class="font-medium mb-2">Khoảng giá</h3>
+                        <select name="price_range" class="w-full rounded-md border p-2">
+                            <option value="">Tất cả giá</option>
+                            <option value="0-500000" <?php echo (isset($filters['price_range']) && $filters['price_range'] == '0-500000') ? 'selected' : ''; ?>>
+                                Dưới 500.000đ
                             </option>
-                            <option value="price_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_desc') ? 'selected' : ''; ?>>
-                                Giá: Cao đến thấp
+                            <option value="500000-1000000" <?php echo (isset($filters['price_range']) && $filters['price_range'] == '500000-1000000') ? 'selected' : ''; ?>>
+                                500.000đ - 1.000.000đ
                             </option>
-                            <option value="name_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_asc') ? 'selected' : ''; ?>>
-                                Tên: A-Z
+                            <option value="1000000-2000000" <?php echo (isset($filters['price_range']) && $filters['price_range'] == '1000000-2000000') ? 'selected' : ''; ?>>
+                                1.000.000đ - 2.000.000đ
                             </option>
-                            <option value="name_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_desc') ? 'selected' : ''; ?>>
-                                Tên: Z-A
-                            </option>
-                            <option value="newest" <?php echo (isset($filters['sort']) && $filters['sort'] == 'newest') ? 'selected' : ''; ?>>
-                                Mới nhất
+                            <option value="2000000-up" <?php echo (isset($filters['price_range']) && $filters['price_range'] == '2000000-up') ? 'selected' : ''; ?>>
+                                Trên 2.000.000đ
                             </option>
                         </select>
                     </div>
 
-                    <button type="submit" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-md px-4 py-2 font-medium">
+                    <!-- Sort Filter -->
+                    <div class="border-t py-4">
+                        <h3 class="font-medium mb-2">Sắp xếp</h3>
+                        <select name="sort" class="w-full rounded-md border p-2">
+                            <option value="">Mặc định</option>
+                            <option value="price_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_asc') ? 'selected' : ''; ?>>
+                                Giá tăng dần
+                            </option>
+                            <option value="price_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'price_desc') ? 'selected' : ''; ?>>
+                                Giá giảm dần
+                            </option>
+                            <option value="name_asc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_asc') ? 'selected' : ''; ?>>
+                                Tên A-Z
+                            </option>
+                            <option value="name_desc" <?php echo (isset($filters['sort']) && $filters['sort'] == 'name_desc') ? 'selected' : ''; ?>>
+                                Tên Z-A
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-yellow-500 text-white rounded-md py-2 hover:bg-yellow-600">
                         Áp dụng
                     </button>
                 </div>
@@ -165,33 +149,18 @@
             $keyword = $keyword ?? '';
             ?>
 
-            <?php if ($totalPages > 1): ?>
-            <div class="mt-8 flex justify-center">
-                <nav class="flex items-center gap-1">
-                    <!-- Previous Button -->
-                    <a href="?page=<?php echo max(1, $currentPage - 1); ?>&keyword=<?php echo urlencode($keyword); ?>" 
-                       class="rounded-md border px-3 py-2 text-sm <?php echo $currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'; ?>"
-                       <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>>
-                        &lt;
+            <div class="mt-8 flex justify-center gap-2">
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="<?php 
+                        $queryParams = $_GET;
+                        $queryParams['page'] = $i;
+                        echo BASE_URL . '/products/search?' . http_build_query($queryParams);
+                    ?>" 
+                       class="px-4 py-2 rounded-md <?php echo $i == $currentPage ? 'bg-yellow-500 text-white' : 'border hover:bg-gray-50'; ?>">
+                        <?php echo $i; ?>
                     </a>
-                    
-                    <!-- Page Numbers -->
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>" 
-                           class="rounded-md <?php echo $i === $currentPage ? 'bg-yellow-500 text-white' : 'border hover:bg-gray-100'; ?> px-3 py-2 text-sm">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
-                    
-                    <!-- Next Button -->
-                    <a href="?page=<?php echo min($totalPages, $currentPage + 1); ?>&keyword=<?php echo urlencode($keyword); ?>" 
-                       class="rounded-md border px-3 py-2 text-sm <?php echo $currentPage >= $totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'; ?>"
-                       <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>>
-                        &gt;
-                    </a>
-                </nav>
+                <?php endfor; ?>
             </div>
-            <?php endif; ?>
         </div>
     </div>
 </div>
