@@ -17,25 +17,35 @@ class Category extends BaseModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function add($data) {
+    public function add($formData) {
+        extract($formData);
         $sql = "INSERT INTO {$this->table} (tenLoaiGiay) VALUES (:tenLoaiGiay)";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':tenLoaiGiay' => $data['tenLoaiGiay']]);
+        return $stmt->execute([
+            ':tenLoaiGiay' => $tenLoaiGiay,
+        ]);
     }
 
-    public function update($id, $data) {
-        $sql = "UPDATE {$this->table} SET tenLoaiGiay = :tenLoaiGiay WHERE maLoaiGiay = :id";
+    public function update($id, $formData) {
+        extract($formData);
+        $sql = "UPDATE {$this->table} SET tenLoaiGiay = :tenLoaiGiay, trangThai = :trangThai 
+                    WHERE maLoaiGiay = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':tenLoaiGiay' => $data['tenLoaiGiay'],
+            ':tenLoaiGiay' => $tenLoaiGiay,
+            ':trangThai' => $trangThai,
             ':id' => $id
         ]);
     }
 
     public function delete($id) {
-        $sql = "DELETE FROM {$this->table} WHERE maLoaiGiay = :id";
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maLoaiGiay = :id";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':id' => $id]);
+        return $stmt->execute([
+            ':trangThai' => 0,
+            ':id' => $id
+        ]);
     }
 }
+
 ?> 
