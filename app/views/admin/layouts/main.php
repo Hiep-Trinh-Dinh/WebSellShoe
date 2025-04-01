@@ -39,9 +39,6 @@
                 <a href="<?php echo BASE_URL; ?>/admin/suppliers" class="block px-4 py-2 hover:bg-gray-700 <?php echo $currentPage === 'suppliers' ? 'bg-gray-700' : ''; ?>">
                     <i class="fas fa-truck mr-2"></i> Nhà cung cấp
                 </a>
-                <a href="<?php echo BASE_URL; ?>/admin/import" class="block px-4 py-2 hover:bg-gray-700 <?php echo $currentPage === 'import' ? 'bg-gray-700' : ''; ?>">
-                    <i class="fas fa-file-import mr-2"></i> Nhập hàng
-                </a>
             </nav>
         </aside>
 

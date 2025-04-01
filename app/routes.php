@@ -62,9 +62,6 @@ class Routes {
         'admin/suppliers/edit' => ['controller' => 'AdminSupplierController', 'action' => 'edit'],
         'admin/suppliers/delete' => ['controller' => 'AdminSupplierController', 'action' => 'delete'],
         
-        'admin/import' => ['controller' => 'AdminImportController', 'action' => 'index'],
-        'admin/import/add' => ['controller' => 'AdminImportController', 'action' => 'add'],
-        'admin/import/view' => ['controller' => 'AdminImportController', 'action' => 'view'],
     ];
 
     public static function getRoutes() {
