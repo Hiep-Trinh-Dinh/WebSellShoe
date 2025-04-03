@@ -62,49 +62,89 @@
                             </td>
                             <td class="py-4">
                                 <!--- Begin Modal Edit Category -->
-                                <button 
-                                    class="edit-category-btn text-blue-500 hover:text-blue-700 mr-2"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalEditCategory<?php echo $category['maLoaiGiay'] ?>" 
-                                    data-maLoaiGiay="<?php echo $category['maLoaiGiay']; ?>"
-                                    data-tenLoaiGiay="<?php echo $category['tenLoaiGiay']; ?>"
-                                    data-trangThai="<?php echo $category['trangThai']; ?>"
-                                >
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <div class="modal fade" id="modalEditCategory<?php echo $category['maLoaiGiay'] ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-md">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit loại giày</h5>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="categories/edit" method="POST" class="needs-validation" novalidate>
-                                                    <input type="hidden"  id="maLoaiGiay" name="maLoaiGiay"  value="<?php echo $category['maLoaiGiay'] ?>" >
-                                                    <div class="mb-3">
-                                                        <label for="tenLoaiGiay" class="col-form-label">Tên giày:</label>
-                                                        <input type="text" class="form-control" id="tenLoaiGiay<?php echo $category['maLoaiGiay'] ?>" name="tenLoaiGiay" required>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                <?php if($category['trangThai'] != 0): ?>
+                                    <button 
+                                        class="edit-category-btn text-blue-500 hover:text-blue-700 mr-2"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditCategory<?php echo $category['maLoaiGiay'] ?>" 
+                                        data-maLoaiGiay="<?php echo $category['maLoaiGiay']; ?>"
+                                        data-tenLoaiGiay="<?php echo $category['tenLoaiGiay']; ?>"
+                                        data-trangThai="<?php echo $category['trangThai']; ?>"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalEditCategory<?php echo $category['maLoaiGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit loại giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="categories/edit" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maLoaiGiay" name="maLoaiGiay"  value="<?php echo $category['maLoaiGiay'] ?>" >
+                                                        <div class="mb-3">
+                                                            <label for="tenLoaiGiay" class="col-form-label">Tên giày:</label>
+                                                            <input type="text" class="form-control" id="tenLoaiGiay<?php echo $category['maLoaiGiay'] ?>" name="tenLoaiGiay" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <select class="form-select" id="trangThai<?php echo $category['maLoaiGiay'] ?>" name="trangThai" aria-label="Default select example">
-                                                            <option value="1">Hoạt động</option>
-                                                            <option value="0">Khóa</option>
-                                                        </select>
-
-                                                    </div>
-                                                    <div class="mt-3" style="float: right;">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
-                                                    </div>
-                                                </form>
+                                                        <div class="mb-3">
+                                                            <select class="form-select" id="trangThai<?php echo $category['maLoaiGiay'] ?>" name="trangThai" aria-label="Default select example">
+                                                                <option value="1">Hoạt động</option>
+                                                                <option value="0">Khóa</option>
+                                                            </select>
+    
+                                                        </div>
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+
+                                <?php endif; ?>
                                 <!--- End Modal Edit Category -->
+
+                                <!-- Begin Modal Unlock Category -->
+                                <?php if($category['trangThai'] != 1): ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalUnlockCategory<?php echo $category['maLoaiGiay'] ?>" 
+                                        class="text-yellow-500 hover:text-yellow-700 mr-2"
+                                    >
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalUnlockCategory<?php echo $category['maLoaiGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Unlock loại giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="categories/unlock" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maLoaiGiay" name="maLoaiGiay"  value="<?php echo $category['maLoaiGiay'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn mở khóa loại giày <?php echo $category['tenLoaiGiay'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- End Modal Unlock Category -->
+
+                                <!-- Begin Modal Delete Category -->
                                 <?php if($category['trangThai'] != 0): ?>
                                     <button 
                                         type="button"
@@ -136,7 +176,9 @@
                                             </div>
                                         </div>
                                     </div>
+
                                 <?php endif; ?>
+                                <!-- End Modal Delete Category -->
                             </td>
                         </tr>
                         <?php endforeach; ?>

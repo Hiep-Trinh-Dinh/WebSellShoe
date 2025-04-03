@@ -46,6 +46,15 @@ class Category extends BaseModel {
             ':id' => $id
         ]);
     }
+
+    public function unlock($id) {
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maLoaiGiay = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':trangThai' => 1,
+            ':id' => $id
+        ]);
+    }
 }
 
 ?> 

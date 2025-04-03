@@ -86,7 +86,25 @@ class AdminCategoryController extends BaseController {
                     </script>";
                 exit();
             }
+        }
+    }
 
+    public function unlock()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['maLoaiGiay'] = $_POST['maLoaiGiay'];
+            
+            $isUnlockCategory = $this->categoryModel->unlock($formData['maLoaiGiay']);
+            if($isUnlockCategory)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Mở khóa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/categories';
+                    </script>";
+                exit();
+            }
         }
     }
 } 
