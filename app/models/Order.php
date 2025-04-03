@@ -36,13 +36,25 @@ class Order extends BaseModel {
     }
 
     public function getAll() {
-        $sql = "SELECT hd.*, tk.tenTK 
-                FROM HoaDon hd 
-                LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK 
-                ORDER BY hd.ngayTao DESC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT hd.*, tk.tenTK 
+                    FROM HoaDon hd
+                    LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
+                    ORDER BY hd.ngayTao DESC";
+                    
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            
+            $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Thêm logging để debug
+            error_log("Orders data: " . print_r($orders, true));
+            
+            return $orders;
+        } catch (PDOException $e) {
+            error_log("Error in getAll: " . $e->getMessage());
+            return [];
+        }
     }
 
     public function getById($id) {
@@ -50,30 +62,115 @@ class Order extends BaseModel {
                 FROM HoaDon hd 
                 LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK 
                 WHERE hd.maHD = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->db->query($sql, ['id' => $id])[0] ?? null;
     }
 
     public function getOrderDetails($orderId) {
-        $sql = "SELECT ct.*, g.tenGiay, g.size 
-                FROM ChiTietHoaDon ct 
-                LEFT JOIN Giay g ON ct.maGiay = g.maGiay 
-                WHERE ct.maHD = :orderId";
+        $sql = "SELECT cthd.*, g.tenGiay 
+                FROM ChiTietHoaDon cthd 
+                JOIN Giay g ON cthd.maGiay = g.maGiay 
+                WHERE cthd.maHD = :orderId";
+        
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+        $stmt->bindParam(':orderId', $orderId, PDO::PARAM_INT);
         $stmt->execute();
+        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getOrderWithDetails($orderId) {
+        try {
+            error_log("=== Starting getOrderWithDetails ===");
+            error_log("Order ID: " . $orderId);
+            
+            // Kiểm tra xem đơn hàng có tồn tại không
+            $checkSql = "SELECT COUNT(*) as count FROM HoaDon WHERE maHD = :orderId";
+            $checkStmt = $this->db->prepare($checkSql);
+            $checkStmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $checkStmt->execute();
+            $count = $checkStmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            error_log("Order exists in database: " . ($count > 0 ? 'Yes' : 'No'));
+            
+            if ($count == 0) {
+                error_log("Order not found in database");
+                return null;
+            }
+            
+            // Lấy thông tin đơn hàng và thông tin khách hàng
+            $sql = "SELECT 
+                        hd.maHD,
+                        hd.ngayTao,
+                        hd.tongSoLuong,
+                        hd.tongTien,
+                        hd.trangThai,
+                        hd.maTK,
+                        tk.tenTK,
+                        tk.email,
+                        tk.soDT,
+                        tk.diaChi
+                    FROM HoaDon hd
+                    LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
+                    WHERE hd.maHD = :orderId";
+                    
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $order = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("Order data: " . print_r($order, true));
+            
+            if ($order) {
+                // Lấy chi tiết đơn hàng
+                $sql = "SELECT 
+                            cthd.maGiay,
+                            cthd.giaBan,
+                            cthd.soLuong,
+                            cthd.thanhTien,
+                            g.tenGiay,
+                            g.size
+                        FROM ChiTietHoaDon cthd
+                        JOIN Giay g ON cthd.maGiay = g.maGiay
+                        WHERE cthd.maHD = :orderId";
+                        
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+                $stmt->execute();
+                
+                $order['items'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                error_log("Order items: " . print_r($order['items'], true));
+            } else {
+                error_log("Failed to fetch order details");
+            }
+            
+            error_log("=== End getOrderWithDetails ===");
+            return $order;
+        } catch (PDOException $e) {
+            error_log("Error in getOrderWithDetails: " . $e->getMessage());
+            error_log("SQL Error Code: " . $e->getCode());
+            error_log("SQL Error Info: " . print_r($stmt->errorInfo(), true));
+            return null;
+        }
+    }
+
     public function updateStatus($id, $status) {
-        $sql = "UPDATE {$this->table} SET trangThai = :status WHERE maHD = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':status' => $status,
-            ':id' => $id
-        ]);
+        try {
+            $sql = "UPDATE HoaDon SET trangThai = :status WHERE maHD = :id";
+            error_log("Executing SQL: " . $sql . " with id: " . $id . ", status: " . $status);
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+            
+            $result = $stmt->execute();
+            error_log("Update result: " . ($result ? "success" : "failed"));
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Error in updateStatus: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getRecentOrders($limit = 5) {
@@ -159,6 +256,29 @@ class Order extends BaseModel {
         } catch (PDOException $e) {
             error_log("Error in getOrdersByUserId: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function getOrderById($id) {
+        try {
+            $sql = "SELECT hd.*, tk.tenTK 
+                    FROM HoaDon hd 
+                    JOIN TaiKhoan tk ON hd.maTK = tk.maTK 
+                    WHERE hd.maHD = :id";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Log kết quả
+            error_log("Order query result: " . print_r($result, true));
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            return false;
         }
     }
 }

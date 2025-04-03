@@ -48,7 +48,11 @@ class Routes {
         'admin/categories/delete' => ['controller' => 'AdminCategoryController', 'action' => 'delete'],
         
         'admin/orders' => ['controller' => 'AdminOrderController', 'action' => 'index'],
-        'admin/orders/viewOrder' => ['controller' => 'AdminOrderController', 'action' => 'viewOrder'],
+        'admin/orders/view/([0-9]+)' => [
+            'controller' => 'AdminOrderController',
+            'action' => 'viewOrder',
+            'params' => ['id']
+        ],
         'admin/orders/update-status' => ['controller' => 'AdminOrderController', 'action' => 'updateStatus'],
         
         'admin/users' => ['controller' => 'AdminUserController', 'action' => 'index'],

@@ -1,5 +1,6 @@
 <?php
 class AdminProductController extends BaseController {
+    private $data;
     private $productModel;
     private $categoryModel;
 
@@ -11,34 +12,125 @@ class AdminProductController extends BaseController {
         }
         $this->productModel = $this->loadModel('Product');
         $this->categoryModel = $this->loadModel('Category');
+        $this->generator();
     }
 
     public function index() {
-        $products = $this->productModel->getAll();
         
         // Debug để kiểm tra dữ liệu
         // echo '<pre>'; print_r($products); echo '</pre>';
         
-        $this->view('admin/layouts/main', [
-            'content' => 'admin/products/index.php',
-            'title' => 'Quản lý sản phẩm',
-            'currentPage' => 'products',
-            'products' => $products
-        ]);
+        $this->view('admin/layouts/main', $this->data);
     }
 
-    public function add() {
+    public function generator()
+    {
+        $products = $this->productModel->getAll();
         $categories = $this->categoryModel->getAll();
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Xử lý thêm sản phẩm
-        }
-        $this->view('admin/layouts/main', [
-            'content' => 'admin/products/add.php',
-            'title' => 'Thêm sản phẩm mới',
-            'currentPage' => 'products',
-            'categories' => $categories
-        ]);
+        $this->data['content'] = 'admin/products/index.php';
+        $this->data['title'] = 'Quản lý sản phẩm';
+        $this->data['currentPage'] = 'products';
+        $this->data['products'] = $products;
+        $this->data['categories'] = $categories;
     }
 
-    // Thêm các methods edit và delete
+    public function add()
+    {
+        $formData = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['tenGiay'] = $_POST['tenGiay'];
+            $formData['maLoaiGiay'] = $_POST['maLoaiGiay'];
+            $formData['size'] = $_POST['size'];
+            $formData['giaBan'] = $_POST['giaBan'];
+            $formData['tonKho']= $_POST['tonKho'];
+            $formData['hinhAnh'] = $_POST['hinhAnh'];
+            $isTenGiayExists = $this->productModel->isTenGiayExists($formData['tenGiay']);
+            if($isTenGiayExists)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Giày này đã có trong danh sách');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                return;
+            }
+            $isAddProduct = $this->productModel->add($formData);
+            if($isAddProduct)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Thêm thành công');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+            else
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Thêm thất bại');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+        }
+    }
+
+    public function edit()
+    {
+        $formData = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['maGiay'] = $_POST['maGiay'];
+            $formData['tenGiay'] = $_POST['tenGiay'];
+            $formData['maLoaiGiay'] = $_POST['maLoaiGiay'];
+            $formData['size'] = $_POST['size'];
+            $formData['giaBan'] = $_POST['giaBan'];
+            $formData['tonKho']= $_POST['tonKho'];
+            $formData['hinhAnh'] = $_POST['hinhAnhMoi'] ? $_POST['hinhAnhMoi'] : $_POST['hinhAnhCu'];
+            $formData['trangThai']= $_POST['trangThai'];
+
+            $isEditProduct = $this->productModel->update($formData['maGiay'], $formData);
+            if($isEditProduct)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Sửa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+            else
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Sửa thất bại');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+        }
+    }
+
+    public function delete()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['maGiay'] = $_POST['maGiay'];
+            
+            $isDeleteProduct = $this->productModel->delete($formData['maGiay']);
+            if($isDeleteProduct)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Khóa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+
+        }
+    }
+
 } 

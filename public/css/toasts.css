@@ -1,0 +1,132 @@
+:root {
+    --success: rgb(0, 128, 0);
+    --warning: rgb(230, 153, 29);
+    --error: rgb(244, 16, 16);
+    --success-light: rgba(0, 128, 0, 0.4);
+    --warning-light: rgba(230, 153, 29, 0.4);
+    --error-light: rgba(244, 16, 16, 0.4);
+}
+
+
+.success {
+    background: var(--success);
+
+}
+
+.warning {
+    background: var(--warning);
+}
+
+.error {
+    background: var(--error);
+}
+
+
+#toasts {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 99999 !important;
+    opacity: 1;
+}
+
+.toast {
+    padding: 20px;
+    border-radius: 6px;
+    color: white;
+    font-size: 18px;
+    overflow: hidden;
+    animation: slide_show 2s ease forwards;
+}
+
+.toast i {
+    margin-right :10px;
+}
+
+.toast .countdown {
+    position: absolute;
+    height: 4px;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    animation: countdown 2s ease forwards;
+}
+
+.toast.success {
+    background: var(--success-light);
+    border-left: 6px solid var(--success);
+}
+
+.toast.success .countdown {
+    background:var(--success);
+}
+
+.toast.warning {
+    background: var(--warning-light);
+    border-left: 6px solid var(--warning);
+}
+
+.toast.warning .countdown {
+    background:var(--warning);
+}
+
+.toast.error {
+    background: var(--error-light);
+    border-left: 6px solid var(--error);
+}
+
+.toast.error .countdown {
+    background:var(--error);
+}
+
+
+
+
+@keyframes countdown {
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
+@keyframes slide_show {
+    0% {
+        transform: translateX(100%);
+    }
+
+    25% {
+        transform: translateX(-10%);
+    }
+
+    50% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-10px);
+    }
+}
+
+@keyframes slide_hide {
+    0% {
+        transform: translateX(-10%);
+    }
+
+    25% {
+        transform: translateX(0%);
+    }
+
+    50% {
+        transform: translateX(-10%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}
+

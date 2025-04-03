@@ -327,42 +327,53 @@ class Product extends BaseModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function add($data) {
+    public function add($formData) {
+        extract($formData);
+        $hinhAnh = base64_encode($hinhAnh);
         $sql = "INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho, hinhAnh) 
                 VALUES (:tenGiay, :maLoaiGiay, :size, :giaBan, :tonKho, :hinhAnh)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':tenGiay' => $data['tenGiay'],
-            ':maLoaiGiay' => $data['maLoaiGiay'],
-            ':size' => $data['size'],
-            ':giaBan' => $data['giaBan'],
-            ':tonKho' => $data['tonKho'],
-            ':hinhAnh' => $data['hinhAnh']
+            ':tenGiay' => $tenGiay,
+            ':maLoaiGiay' => $maLoaiGiay,
+            ':size' => $size,
+            ':giaBan' => $giaBan,
+            ':tonKho' => $tonKho,
+            ':hinhAnh' => $hinhAnh
         ]);
     }
 
-    public function update($id, $data) {
+    public function isTenGiayExists($tenGiay) {
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE tenGiay = :tenGiay";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':tenGiay' => $tenGiay]);
+        $count = $stmt->fetchColumn();
+        return $count > 0;
+    }
+
+    public function update($id, $formData) {
+        extract($formData);
+        $hinhAnh = base64_encode($hinhAnh);
         $sql = "UPDATE Giay 
                 SET tenGiay = :tenGiay, 
                     maLoaiGiay = :maLoaiGiay, 
                     size = :size, 
                     giaBan = :giaBan, 
-                    tonKho = :tonKho";
+                    tonKho = :tonKho,
+                    hinhAnh = :hinhAnh,
+                    trangThai = :trangThai";
         
         $params = [
-            ':tenGiay' => $data['tenGiay'],
-            ':maLoaiGiay' => $data['maLoaiGiay'],
-            ':size' => $data['size'],
-            ':giaBan' => $data['giaBan'],
-            ':tonKho' => $data['tonKho'],
+            ':tenGiay' => $tenGiay,
+            ':maLoaiGiay' => $maLoaiGiay,
+            ':size' => $size,
+            ':giaBan' => $giaBan,
+            ':tonKho' => $tonKho,
+            ':hinhAnh' => $hinhAnh,
+            ':trangThai' => $trangThai,
             ':id' => $id
         ];
 
-        // Chỉ cập nhật hình ảnh nếu có
-        if (isset($data['hinhAnh']) && !empty($data['hinhAnh'])) {
-            $sql .= ", hinhAnh = :hinhAnh";
-            $params[':hinhAnh'] = $data['hinhAnh'];
-        }
 
         $sql .= " WHERE maGiay = :id";
         
@@ -371,9 +382,12 @@ class Product extends BaseModel {
     }
 
     public function delete($id) {
-        $sql = "DELETE FROM Giay WHERE maGiay = :id";
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':id' => $id]);
+        return $stmt->execute([
+            ':trangThai' => 0,
+            ':id' => $id
+        ]);
     }
 
     public function updateStock($id, $quantity) {

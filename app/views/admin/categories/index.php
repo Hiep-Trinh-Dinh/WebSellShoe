@@ -1,20 +1,50 @@
 <div class="bg-white shadow rounded-lg">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Danh sách loại giày</h2>
-        <button type="button" 
-                onclick="openAddModal()"
-                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            <i class="fas fa-plus"></i> Thêm loại giày
+        <!--- Begin Modal Add Category -->
+        <button 
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalAddCategory" 
+            data-bs-whatever="@mdo"
+        >
+            <i class="fas fa-plus"></i> 
+            Thêm loại giày
         </button>
+        <div class="modal fade" id="modalAddCategory" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm loại giày</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form action="categories/add" method="POST" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="tenLoaiGiay" class="col-form-label">Tên giày:</label>
+                                <input type="text" class="form-control" id="tenLoaiGiay" name="tenLoaiGiay" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng không để trống trường này
+                                </div>
+                            </div>
+                            <div class="mt-3" style="float: right;">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--- End Modal Add Category -->
     </div>
-    
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="table-categories w-full">
                 <thead>
                     <tr class="text-left">
                         <th class="pb-4">Mã loại</th>
                         <th class="pb-4">Tên loại giày</th>
+                        <th class="pb-4">Trạng thái</th>
                         <th class="pb-4">Thao tác</th>
                     </tr>
                 </thead>
@@ -25,16 +55,88 @@
                             <td class="py-4"><?php echo htmlspecialchars($category['maLoaiGiay'] ?? ''); ?></td>
                             <td class="py-4"><?php echo htmlspecialchars($category['tenLoaiGiay'] ?? ''); ?></td>
                             <td class="py-4">
-                                <button type="button"
-                                        onclick="openEditModal(<?php echo $category['maLoaiGiay']; ?>, '<?php echo htmlspecialchars($category['tenLoaiGiay']); ?>')"
-                                        class="text-blue-500 hover:text-blue-700 mr-2">
+                                <span class="px-2 py-1 rounded-full text-xs 
+                                    <?php echo $category['trangThai'] == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; ?>">
+                                    <?php echo $category['trangThai'] == 1 ? 'Hoạt động' : 'Khóa'; ?>
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <!--- Begin Modal Edit Category -->
+                                <button 
+                                    class="edit-category-btn text-blue-500 hover:text-blue-700 mr-2"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalEditCategory<?php echo $category['maLoaiGiay'] ?>" 
+                                    data-maLoaiGiay="<?php echo $category['maLoaiGiay']; ?>"
+                                    data-tenLoaiGiay="<?php echo $category['tenLoaiGiay']; ?>"
+                                    data-trangThai="<?php echo $category['trangThai']; ?>"
+                                >
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button type="button"
-                                        onclick="deleteCategory(<?php echo $category['maLoaiGiay']; ?>)"
-                                        class="text-red-500 hover:text-red-700">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <div class="modal fade" id="modalEditCategory<?php echo $category['maLoaiGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-md">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Edit loại giày</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="categories/edit" method="POST" class="needs-validation" novalidate>
+                                                    <input type="hidden"  id="maLoaiGiay" name="maLoaiGiay"  value="<?php echo $category['maLoaiGiay'] ?>" >
+                                                    <div class="mb-3">
+                                                        <label for="tenLoaiGiay" class="col-form-label">Tên giày:</label>
+                                                        <input type="text" class="form-control" id="tenLoaiGiay<?php echo $category['maLoaiGiay'] ?>" name="tenLoaiGiay" required>
+                                                        <div class="invalid-feedback">
+                                                            Vui lòng không để trống trường này
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <select class="form-select" id="trangThai<?php echo $category['maLoaiGiay'] ?>" name="trangThai" aria-label="Default select example">
+                                                            <option value="1">Hoạt động</option>
+                                                            <option value="0">Khóa</option>
+                                                        </select>
+
+                                                    </div>
+                                                    <div class="mt-3" style="float: right;">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--- End Modal Edit Category -->
+                                <?php if($category['trangThai'] != 0): ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalDeleteCategory<?php echo $category['maLoaiGiay'] ?>" 
+                                        class="text-red-500 hover:text-red-700"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalDeleteCategory<?php echo $category['maLoaiGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Delete loại giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="categories/delete" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maLoaiGiay" name="maLoaiGiay"  value="<?php echo $category['maLoaiGiay'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn khóa loại giày <?php echo $category['tenLoaiGiay'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -49,81 +151,31 @@
     </div>
 </div>
 
-<!-- Modal Thêm/Sửa -->
-<div id="categoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Thêm loại giày mới</h3>
-            <form id="categoryForm" class="mt-4">
-                <input type="hidden" id="categoryId" name="maLoaiGiay" value="">
-                <div class="mt-2">
-                    <label for="tenLoaiGiay" class="block text-sm font-medium text-gray-700">Tên loại giày</label>
-                    <input type="text" 
-                           id="tenLoaiGiay" 
-                           name="tenLoaiGiay" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button type="button" 
-                            onclick="closeModal()"
-                            class="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                        Hủy
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                        Lưu
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 <script>
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Thêm loại giày mới';
-    document.getElementById('categoryId').value = '';
-    document.getElementById('tenLoaiGiay').value = '';
-    document.getElementById('categoryModal').classList.remove('hidden');
-}
+// GÁN GIÁ TRỊ VÀO MODAL SỬA SẢN PHẨM    
+document.addEventListener("DOMContentLoaded", function () {
+    let editButtons = document.querySelectorAll(".edit-category-btn");
+    
+    editButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            let maLoaiGiay = btn.getAttribute("data-maLoaiGiay");
+            let tenLoaiGiay = btn.getAttribute("data-tenLoaiGiay");
+            let trangThai = btn.getAttribute("data-trangThai");
 
-function openEditModal(id, name) {
-    document.getElementById('modalTitle').textContent = 'Sửa loại giày';
-    document.getElementById('categoryId').value = id;
-    document.getElementById('tenLoaiGiay').value = name;
-    document.getElementById('categoryModal').classList.remove('hidden');
-}
+            // Gán giá trị vào input trong modal
+            document.getElementById("tenLoaiGiay" + maLoaiGiay).value = tenLoaiGiay;
+            document.getElementById("trangThai" + maLoaiGiay).value = trangThai;
+        });
+    });
+});
 
-function closeModal() {
-    document.getElementById('categoryModal').classList.add('hidden');
-}
 
 function deleteCategory(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa loại giày này?')) {
+    if (confirm('Bạn có chắc chắn muốn khóa loại giày này?')) {
         window.location.href = `${BASE_URL}/admin/categories/delete/${id}`;
     }
 }
 
-document.getElementById('categoryForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const id = document.getElementById('categoryId').value;
-    const url = id ? `${BASE_URL}/admin/categories/edit/${id}` : `${BASE_URL}/admin/categories/add`;
-    
-    fetch(url, {
-        method: 'POST',
-        body: new FormData(this)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.reload();
-        } else {
-            alert(data.message || 'Có lỗi xảy ra');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra');
-    });
-});
 </script> 

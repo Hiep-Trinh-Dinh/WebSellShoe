@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS NhaCungCap (
 
 CREATE TABLE IF NOT EXISTS LoaiGiay (
     maLoaiGiay INT AUTO_INCREMENT PRIMARY KEY,
-    tenLoaiGiay VARCHAR(50)
+    tenLoaiGiay VARCHAR(50),
+    trangThai INT DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS Giay (
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS Giay (
     giaBan INT,
     tonKho INT,
     hinhAnh LONGBLOB,
+    trangThai INT DEFAULT 1,
     FOREIGN KEY (maLoaiGiay) REFERENCES LoaiGiay(maLoaiGiay)
 );
 
@@ -82,8 +84,6 @@ CREATE TABLE IF NOT EXISTS ChiTietHoaDon (
     FOREIGN KEY (maHD) REFERENCES HoaDon(maHD),
     FOREIGN KEY (maGiay) REFERENCES Giay(maGiay)
 );
-
-
 
 
 
