@@ -21,26 +21,41 @@ class AdminOrderController extends BaseController {
         ]);
     }
 
-    public function viewOrder($id = null) {
-        if (!$id) {
-            $_SESSION['error'] = 'ID đơn hàng không hợp lệ';
-            header('Location: ' . BASE_URL . '/admin/orders');
-            exit();
+    protected function getOrderStatus($status) {
+        switch($status) {
+            case 1: return 'Đang xử lý';
+            case 2: return 'Đã xác nhận';
+            case 3: return 'Đang giao hàng';
+            case 4: return 'Đã giao hàng';
+            case 5: return 'Đã hủy';
+            default: return 'Không xác định';
         }
+    }
 
-        $order = $this->orderModel->getById($id);
-        $orderDetails = $this->orderModel->getOrderDetails($id);
-        
+    public function viewOrder($id) {
+        // Kiểm tra quyền admin
+        $this->requireAdmin();
+
+        // Đảm bảo $id là số nguyên
+        $orderId = is_array($id) ? $id[0] : $id;
+        $orderId = (int)$orderId;
+
+        // Lấy thông tin đơn hàng
+        $orderModel = $this->loadModel('Order');
+        $order = $orderModel->getOrderById($orderId);
+
         if (!$order) {
-            $_SESSION['error'] = 'Đơn hàng không tồn tại';
-            header('Location: ' . BASE_URL . '/admin/orders');
-            exit();
+            // Sử dụng session để lưu thông báo lỗi
+            $_SESSION['error'] = 'Không tìm thấy đơn hàng';
+            $this->redirect('admin/orders');
+            return;
         }
 
-        $this->view('admin/layouts/main', [
-            'content' => 'admin/orders/view.php',
-            'title' => 'Chi tiết đơn hàng #' . $id,
-            'currentPage' => 'orders',
+        // Lấy chi tiết đơn hàng
+        $orderDetails = $orderModel->getOrderDetails($orderId);
+
+        // Render view
+        $this->view('admin/orders/view', [
             'order' => $order,
             'orderDetails' => $orderDetails
         ]);
@@ -51,11 +66,18 @@ class AdminOrderController extends BaseController {
             $orderId = $_POST['orderId'] ?? null;
             $status = $_POST['status'] ?? null;
 
+            error_log("Updating order status - Order ID: " . $orderId . ", Status: " . $status);
+
             if ($orderId && $status !== null) {
                 if ($this->orderModel->updateStatus($orderId, $status)) {
+                    error_log("Status updated successfully");
                     echo json_encode(['success' => true]);
                     exit();
+                } else {
+                    error_log("Failed to update status");
                 }
+            } else {
+                error_log("Invalid orderId or status");
             }
             echo json_encode(['success' => false, 'message' => 'Cập nhật trạng thái thất bại']);
             exit();

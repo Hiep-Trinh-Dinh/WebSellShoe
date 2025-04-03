@@ -11,6 +11,7 @@
                         <th class="pb-4">Mã ĐH</th>
                         <th class="pb-4">Khách hàng</th>
                         <th class="pb-4">Ngày tạo</th>
+                        <th class="pb-4">Số lượng</th>
                         <th class="pb-4">Tổng tiền</th>
                         <th class="pb-4">Trạng thái</th>
                         <th class="pb-4">Thao tác</th>
@@ -23,35 +24,30 @@
                             <td class="py-4">#<?php echo $order['maHD']; ?></td>
                             <td class="py-4"><?php echo htmlspecialchars($order['tenTK'] ?? 'Khách vãng lai'); ?></td>
                             <td class="py-4"><?php echo date('d/m/Y H:i', strtotime($order['ngayTao'])); ?></td>
+                            <td class="py-4"><?php echo $order['tongSoLuong']; ?></td>
                             <td class="py-4"><?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ</td>
                             <td class="py-4">
                                 <select onchange="updateOrderStatus(<?php echo $order['maHD']; ?>, this.value)"
                                         class="rounded-full px-3 py-1 text-sm 
                                         <?php
                                         switch($order['trangThai']) {
-                                            case 0:
-                                                echo 'bg-yellow-100 text-yellow-800';
-                                                break;
-                                            case 1:
-                                                echo 'bg-blue-100 text-blue-800';
-                                                break;
-                                            case 2:
-                                                echo 'bg-green-100 text-green-800';
-                                                break;
-                                            case 3:
-                                                echo 'bg-red-100 text-red-800';
-                                                break;
+                                            case 1: echo 'bg-green-100 text-green-800'; break;
+                                            case 2: echo 'bg-yellow-100 text-yellow-800'; break;
+                                            case 3: echo 'bg-blue-100 text-blue-800'; break;
+                                            case 4: echo 'bg-gray-100 text-gray-800'; break;
+                                            default: echo 'bg-red-100 text-red-800';
                                         }
                                         ?>">
-                                    <option value="0" <?php echo $order['trangThai'] == 0 ? 'selected' : ''; ?>>Chờ xử lý</option>
-                                    <option value="1" <?php echo $order['trangThai'] == 1 ? 'selected' : ''; ?>>Đang giao</option>
-                                    <option value="2" <?php echo $order['trangThai'] == 2 ? 'selected' : ''; ?>>Đã giao</option>
-                                    <option value="3" <?php echo $order['trangThai'] == 3 ? 'selected' : ''; ?>>Đã hủy</option>
+                                    <option value="1" <?php echo $order['trangThai'] == 1 ? 'selected' : ''; ?>>Đang xử lý</option>
+                                    <option value="2" <?php echo $order['trangThai'] == 2 ? 'selected' : ''; ?>>Đang giao</option>
+                                    <option value="3" <?php echo $order['trangThai'] == 3 ? 'selected' : ''; ?>>Đã giao</option>
+                                    <option value="4" <?php echo $order['trangThai'] == 4 ? 'selected' : ''; ?>>Đã hủy</option>
                                 </select>
                             </td>
                             <td class="py-4">
-                                <a href="<?php echo BASE_URL; ?>/admin/orders/viewOrder/<?php echo $order['maHD']; ?>" 
-                                   class="text-blue-500 hover:text-blue-700">
+                                <a href="<?php echo BASE_URL; ?>/admin/orders/view/<?php echo $order['maHD']; ?>" 
+                                   class="text-blue-500 hover:text-blue-700"
+                                   onclick="return confirm('Bạn có muốn xem chi tiết đơn hàng này?')">
                                     <i class="fas fa-eye"></i> Xem
                                 </a>
                             </td>
@@ -59,7 +55,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="py-4 text-center text-gray-500">Không có đơn hàng nào</td>
+                            <td colspan="7" class="py-4 text-center">Không có đơn hàng nào</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -70,24 +66,26 @@
 
 <script>
 function updateOrderStatus(orderId, status) {
-    fetch(`${BASE_URL}/admin/orders/update-status`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `orderId=${orderId}&status=${status}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.reload();
-        } else {
-            alert(data.message || 'Có lỗi xảy ra');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra');
-    });
+    if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng?')) {
+        fetch(`${BASE_URL}/admin/orders/update-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `orderId=${orderId}&status=${status}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra');
+        });
+    }
 }
 </script> 
