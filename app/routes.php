@@ -41,11 +41,13 @@ class Routes {
         'admin/products/add' => ['controller' => 'AdminProductController', 'action' => 'add'],
         'admin/products/edit' => ['controller' => 'AdminProductController', 'action' => 'edit'],
         'admin/products/delete' => ['controller' => 'AdminProductController', 'action' => 'delete'],
+        'admin/products/unlock' => ['controller' => 'AdminProductController', 'action' => 'unlock'],
         
         'admin/categories' => ['controller' => 'AdminCategoryController', 'action' => 'index'],
         'admin/categories/add' => ['controller' => 'AdminCategoryController', 'action' => 'add'],
         'admin/categories/edit' => ['controller' => 'AdminCategoryController', 'action' => 'edit'],
         'admin/categories/delete' => ['controller' => 'AdminCategoryController', 'action' => 'delete'],
+        'admin/categories/unlock' => ['controller' => 'AdminCategoryController', 'action' => 'unlock'],
         
         'admin/orders' => ['controller' => 'AdminOrderController', 'action' => 'index'],
         'admin/orders/viewOrder' => ['controller' => 'AdminOrderController', 'action' => 'viewOrder'],

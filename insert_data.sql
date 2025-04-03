@@ -18,7 +18,7 @@ INSERT INTO LoaiGiay (tenLoaiGiay) VALUES
 ('Giày cao gót', 1);
 
 -- Thêm dữ liệu cho bảng Giay
-INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho) VALUES
+INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho, trangThai) VALUES
 ('Nike Air Max', 1, 42, 2500000, 50, 1),
 ('Adidas Ultraboost', 1, 41, 3000000, 30, 1),
 ('Clarks Oxford', 2, 43, 1800000, 20, 1),

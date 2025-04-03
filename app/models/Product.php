@@ -390,6 +390,15 @@ class Product extends BaseModel {
         ]);
     }
 
+    public function unlock($id) {
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':trangThai' => 1,
+            ':id' => $id
+        ]);
+    }
+
     public function updateStock($id, $quantity) {
         $sql = "UPDATE Giay SET tonKho = tonKho + :quantity WHERE maGiay = :id";
         $stmt = $this->db->prepare($sql);

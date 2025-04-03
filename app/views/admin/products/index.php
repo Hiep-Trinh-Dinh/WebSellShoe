@@ -126,118 +126,157 @@
                             </td>
                             <td class="py-4">
                                 <!--- Begin Modal Edit Product -->
-                                <button 
-                                    class="edit-product-btn text-blue-500 hover:text-blue-700 mr-2"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalEditProduct<?php echo $product['maGiay'] ?>" 
-                                    data-maGiay="<?php echo $product['maGiay']; ?>"
-                                    data-tenGiay="<?php echo $product['tenGiay']; ?>"
-                                    data-maLoaiGiay="<?php echo $product['maLoaiGiay']; ?>"
-                                    data-size="<?php echo $product['size']; ?>"
-                                    data-giaBan="<?php echo $product['giaBan']; ?>"
-                                    data-tonKho="<?php echo $product['tonKho']; ?>"
-                                    data-hinhAnh="<?php echo base64_decode($product['hinhAnh']); ?>"
-                                    data-trangThai="<?php echo $product['trangThai']; ?>"
-                                >
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <div class="modal fade" id="modalEditProduct<?php echo $product['maGiay'] ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit giày</h5>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="products/edit" method="POST" class="needs-validation" novalidate>
-                                                    <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
-                                                    <div class="mb-3" style="display: flex; gap: 20px;">
-                                                        <div>
-                                                            <label for="" class="col-form-label">Hình ảnh:</label>
-                                                            <label class="preview" id="preview<?php echo $product['maGiay'] ?>" for="hinhAnh<?php echo $product['maGiay'] ?>">
-                                                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                                                <span>Upload Image Preview</span>
-                                                                <input type="hidden" name="hinhAnhCu" value="<?php echo base64_decode($product['hinhAnh']) ?>">
-                                                                <img src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product['hinhAnh']) ?>">
-                                                            </label>
-                                                            <input type="file" hidden id="hinhAnh<?php echo $product['maGiay'] ?>" name="hinhAnhMoi">
+                                <?php if($product['trangThai'] != 0): ?>
+                                    <button 
+                                        class="edit-product-btn text-blue-500 hover:text-blue-700 mr-2"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditProduct<?php echo $product['maGiay'] ?>" 
+                                        data-maGiay="<?php echo $product['maGiay']; ?>"
+                                        data-tenGiay="<?php echo $product['tenGiay']; ?>"
+                                        data-maLoaiGiay="<?php echo $product['maLoaiGiay']; ?>"
+                                        data-size="<?php echo $product['size']; ?>"
+                                        data-giaBan="<?php echo $product['giaBan']; ?>"
+                                        data-tonKho="<?php echo $product['tonKho']; ?>"
+                                        data-hinhAnh="<?php echo base64_decode($product['hinhAnh']); ?>"
+                                        data-trangThai="<?php echo $product['trangThai']; ?>"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalEditProduct<?php echo $product['maGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="products/edit" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
+                                                        <div class="mb-3" style="display: flex; gap: 20px;">
+                                                            <div>
+                                                                <label for="" class="col-form-label">Hình ảnh:</label>
+                                                                <label class="preview" id="preview<?php echo $product['maGiay'] ?>" for="hinhAnh<?php echo $product['maGiay'] ?>">
+                                                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                                                    <span>Upload Image Preview</span>
+                                                                    <input type="hidden" name="hinhAnhCu" value="<?php echo base64_decode($product['hinhAnh']) ?>">
+                                                                    <img src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product['hinhAnh']) ?>">
+                                                                </label>
+                                                                <input type="file" hidden id="hinhAnh<?php echo $product['maGiay'] ?>" name="hinhAnhMoi">
+                                                                <div class="invalid-feedback">
+                                                                    Vui lòng không để trống trường này
+                                                                </div>
+                                                            </div>
+                                                            <div style="margin-top: 40px;">
+                                                                <button type="button" class="controll-btn" id="removeImg<?php echo $product['maGiay'] ?>">Bỏ hình</button>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="tenGiay" class="col-form-label">Tên giày:</label>
+                                                            <input type="text" class="form-control" id="tenGiay<?php echo $product['maGiay'] ?>" name="tenGiay" required>
                                                             <div class="invalid-feedback">
                                                                 Vui lòng không để trống trường này
                                                             </div>
                                                         </div>
-                                                        <div style="margin-top: 40px;">
-                                                            <button type="button" class="controll-btn" id="removeImg<?php echo $product['maGiay'] ?>">Bỏ hình</button>
+                                                        <div class="mb-3">
+                                                            <label for="maLoaiGiay" class="col-form-label">Loại giày:</label>
+                                                            <select class="form-select" id="maLoaiGiay<?php echo $product['maGiay'] ?>" name="maLoaiGiay" aria-label="Default select example" required>
+                                                                <option value=""></option>
+                                                                <?php if (!empty($categories)): ?>
+                                                                    <?php foreach ($categories as $category): ?>
+                                                                        <?php if ($category['trangThai'] != 0): ?>
+                                                                            <option value="<?php echo $category['maLoaiGiay'] ?>"><?php echo $category['tenLoaiGiay'] ?></option>
+                                                                        <?php endif; ?>
+                                                                    <?php endforeach; ?>
+                                                                <?php endif; ?>
+                                                            </select>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
-                                                        
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="tenGiay" class="col-form-label">Tên giày:</label>
-                                                        <input type="text" class="form-control" id="tenGiay<?php echo $product['maGiay'] ?>" name="tenGiay" required>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                                        <div class="mb-3">
+                                                            <label for="size" class="col-form-label">Size:</label>
+                                                            <select class="form-select" id="size<?php echo $product['maGiay'] ?>" name="size" aria-label="Default select example" required>
+                                                                <option value=""></option>
+                                                                <option value="38">38</option>
+                                                                <option value="39">39</option>
+                                                                <option value="40">40</option>
+                                                                <option value="41">41</option>
+                                                                <option value="42">42</option>
+                                                            </select>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="maLoaiGiay" class="col-form-label">Loại giày:</label>
-                                                        <select class="form-select" id="maLoaiGiay<?php echo $product['maGiay'] ?>" name="maLoaiGiay" aria-label="Default select example" required>
-                                                            <option value=""></option>
-                                                            <?php if (!empty($categories)): ?>
-                                                                <?php foreach ($categories as $category): ?>
-                                                                    <?php if ($category['trangThai'] != 0): ?>
-                                                                        <option value="<?php echo $category['maLoaiGiay'] ?>"><?php echo $category['tenLoaiGiay'] ?></option>
-                                                                    <?php endif; ?>
-                                                                <?php endforeach; ?>
-                                                            <?php endif; ?>
-                                                        </select>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                                        <div class="mb-3">
+                                                            <label for="giaBan" class="col-form-label">Giá bán:</label>
+                                                            <input type="text" class="form-control" id="giaBan<?php echo $product['maGiay'] ?>" name="giaBan" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="size" class="col-form-label">Size:</label>
-                                                        <select class="form-select" id="size<?php echo $product['maGiay'] ?>" name="size" aria-label="Default select example" required>
-                                                            <option value=""></option>
-                                                            <option value="38">38</option>
-                                                            <option value="39">39</option>
-                                                            <option value="40">40</option>
-                                                            <option value="41">41</option>
-                                                            <option value="42">42</option>
-                                                        </select>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                                        <div class="mb-3">
+                                                            <label for="tonKho" class="col-form-label">Tồn kho:</label>
+                                                            <input type="text" class="form-control" id="tonKho<?php echo $product['maGiay'] ?>" name="tonKho" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="giaBan" class="col-form-label">Giá bán:</label>
-                                                        <input type="text" class="form-control" id="giaBan<?php echo $product['maGiay'] ?>" name="giaBan" required>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                                        <div class="mb-3">
+                                                            <label for="trangThai" class="col-form-label">Trạng thái:</label>
+                                                            <select class="form-select" id="trangThai<?php echo $product['maGiay'] ?>" name="trangThai" aria-label="Default select example" required>
+                                                                <option value="1">Hoạt động</option>
+                                                                <option value="0">Khóa</option>
+                                                            </select>
+    
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="tonKho" class="col-form-label">Tồn kho:</label>
-                                                        <input type="text" class="form-control" id="tonKho<?php echo $product['maGiay'] ?>" name="tonKho" required>
-                                                        <div class="invalid-feedback">
-                                                            Vui lòng không để trống trường này
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" id="edit-close-btn<?php echo $product["maGiay"] ?>" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
                                                         </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="trangThai" class="col-form-label">Trạng thái:</label>
-                                                        <select class="form-select" id="trangThai<?php echo $product['maGiay'] ?>" name="trangThai" aria-label="Default select example" required>
-                                                            <option value="1">Hoạt động</option>
-                                                            <option value="0">Khóa</option>
-                                                        </select>
-
-                                                    </div>
-                                                    <div class="mt-3" style="float: right;">
-                                                        <button type="button" class="btn btn-secondary" id="edit-close-btn<?php echo $product["maGiay"] ?>" data-bs-dismiss="modal">Close</button>
-                                                        <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
-                                                    </div>
-                                                </form>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                                 <!--- End Modal Edit Product -->
+
+                                <!-- Begin Modal Unlock Product -->
+                                <?php if($product['trangThai'] != 1): ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalUnlockProduct<?php echo $product['maGiay'] ?>" 
+                                        class="text-yellow-500 hover:text-yellow-700 mr-2"
+                                    >
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalUnlockProduct<?php echo $product['maGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Unlock giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="products/unlock" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn mở khóa  giày <?php echo $product['tenGiay'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Begin Modal Unlock Product -->
+
+                                <!-- Begin Modal Delete Product -->
                                 <?php if($product['trangThai'] != 0): ?>
                                     <button 
                                         type="button"
@@ -270,6 +309,7 @@
                                         </div>
                                     </div>
                                 <?php endif; ?>
+                                <!-- Begin Modal Delete Product -->
                             </td>
                         </tr>
                         <?php endforeach; ?>

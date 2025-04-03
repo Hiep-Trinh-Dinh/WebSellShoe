@@ -133,4 +133,24 @@ class AdminProductController extends BaseController {
         }
     }
 
+    public function unlock()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['maGiay'] = $_POST['maGiay'];
+            
+            $isUnlockProduct = $this->productModel->unlock($formData['maGiay']);
+            if($isUnlockProduct)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Mở khóa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+
+        }
+    }
+
 } 

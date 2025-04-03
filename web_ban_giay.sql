@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS Giay (
     giaBan INT,
     tonKho INT,
     hinhAnh LONGBLOB,
+    trangThai INT DEFAULT 1,
     FOREIGN KEY (maLoaiGiay) REFERENCES LoaiGiay(maLoaiGiay)
 );
 
