@@ -314,17 +314,20 @@ class Product extends BaseModel {
         return $result['total'];
     }
 
-    public function getLowStockProducts($limit = 5) {
-        $sql = "SELECT g.*, lg.tenLoaiGiay 
-                FROM Giay g 
-                LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
-                WHERE g.tonKho <= 10 
-                ORDER BY g.tonKho ASC 
-                LIMIT :limit";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function getLowStockProducts() {
+        try {
+            $sql = "SELECT g.*, lg.tenLoaiGiay 
+                    FROM Giay g
+                    LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay
+                    WHERE g.tonKho <= 5 
+                    ORDER BY g.tonKho ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error in getLowStockProducts: " . $e->getMessage());
+            return [];
+        }
     }
 
     public function add($formData) {
@@ -406,6 +409,19 @@ class Product extends BaseModel {
             ':quantity' => $quantity,
             ':id' => $id
         ]);
+    }
+
+    // Giữ lại một bản của mỗi method
+    public function getTotalProducts() {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM Giay";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+        } catch (PDOException $e) {
+            error_log("Error in getTotalProducts: " . $e->getMessage());
+            return 0;
+        }
     }
 }
 ?> 
