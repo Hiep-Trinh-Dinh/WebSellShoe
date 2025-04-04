@@ -32,20 +32,35 @@ class Supplier extends BaseModel {
         $sql = "UPDATE {$this->table} 
                 SET tenNCC = :tenNCC, 
                     email = :email, 
-                    diaChi = :diaChi 
+                    diaChi = :diaChi, 
+                    trangThai = :trangThai
                 WHERE maNCC = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':tenNCC' => $data['tenNCC'],
             ':email' => $data['email'],
             ':diaChi' => $data['diaChi'],
+            ':trangThai'=> $data['trangThai'],
             ':id' => $id
         ]);
     }
 
     public function delete($id) {
-        $sql = "DELETE FROM {$this->table} WHERE maNCC = :id";
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maNCC = :id";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':id' => $id]);
+        return $stmt->execute([
+            ':trangThai' => 0,
+            ':id' => $id
+        ]);
     }
+
+    public function unlock($id) {
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maNCC = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':trangThai' => 1,
+            ':id' => $id
+        ]);
+    }
+
 } 

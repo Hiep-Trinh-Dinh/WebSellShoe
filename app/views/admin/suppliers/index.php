@@ -1,11 +1,56 @@
 <div class="bg-white shadow rounded-lg">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 class="text-xl font-semibold">Danh sách nhà cung cấp</h2>
-        <button type="button" 
-                onclick="openAddModal()"
-                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            <i class="fas fa-plus"></i> Thêm nhà cung cấp
+
+        <!--- Begin Modal Add Supplier -->
+        <button 
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalAddSupplier" 
+            data-bs-whatever="@mdo"
+        >
+            <i class="fas fa-plus"></i> 
+            Thêm nhà cung cấp
         </button>
+        <div class="modal fade" id="modalAddSupplier" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm nhà cung cấp</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form action="suppliers/add" method="POST" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="tenNCC" class="col-form-label">Tên nhà cung cấp:</label>
+                                <input type="text" class="form-control" id="tenNCC" name="tenNCC" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng không để trống trường này
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="col-form-label">Email:</label>
+                                <input type="text" class="form-control" id="email" name="email" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng không để trống trường này
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="diaChi" class="col-form-label">Địa chỉ:</label>
+                                <input type="text" class="form-control" id="diaChi" name="diaChi" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng không để trống trường này
+                                </div>
+                            </div>
+                            <div class="mt-3" style="float: right;">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                                <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Thêm</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--- End Modal Add Supplier -->
     </div>
     
     <div class="p-6">
@@ -29,16 +74,149 @@
                             <td class="py-4"><?php echo htmlspecialchars($supplier['email'] ?? ''); ?></td>
                             <td class="py-4"><?php echo htmlspecialchars($supplier['diaChi'] ?? ''); ?></td>
                             <td class="py-4">
-                                <button type="button"
-                                        onclick="openEditModal(<?php echo htmlspecialchars(json_encode($supplier)); ?>)"
-                                        class="text-blue-500 hover:text-blue-700 mr-2">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button"
-                                        onclick="deleteSupplier(<?php echo $supplier['maNCC']; ?>)"
-                                        class="text-red-500 hover:text-red-700">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <span class="px-2 py-1 rounded-full text-xs 
+                                    <?php echo $supplier['trangThai'] == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; ?>">
+                                    <?php echo $supplier['trangThai'] == 1 ? 'Hoạt động' : 'Khóa'; ?>
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <!--- Begin Modal Edit Supplier -->
+                                <?php if($supplier['trangThai'] != 0): ?>
+                                    <button 
+                                        class="edit-supplier-btn text-blue-500 hover:text-blue-700 mr-2"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditSupplier<?php echo $supplier['maNCC'] ?>" 
+                                        data-maNCC="<?php echo $supplier['maNCC']; ?>"
+                                        data-tenNCC="<?php echo $supplier['tenNCC']; ?>"
+                                        data-email="<?php echo $supplier['email']; ?>"
+                                        data-diaChi="<?php echo $supplier['diaChi']; ?>"
+                                        data-trangThai="<?php echo $supplier['trangThai']; ?>"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalEditSupplier<?php echo $supplier['maNCC'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit nhà cung cấp</h5>
+                                                    <!-- <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>    -->
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="suppliers/edit" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maNCC" name="maNCC"  value="<?php echo $supplier['maNCC'] ?>" >
+
+                                                        <div class="mb-3">
+                                                            <label for="tenNCC" class="col-form-label">Tên nhà cung cấp:</label>
+                                                            <input type="text" class="form-control" id="tenNCC<?php echo $supplier['maNCC'] ?>" name="tenNCC" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="email" class="col-form-label">Email:</label>
+                                                            <input type="text" class="form-control" id="email<?php echo $supplier['maNCC'] ?>" name="email" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="diaChi" class="col-form-label">Địa chỉ:</label>
+                                                            <input type="text" class="form-control" id="diaChi<?php echo $supplier['maNCC'] ?>" name="diaChi" required>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="trangThai" class="col-form-label">Trạng thái:</label>
+                                                            <select class="form-select" id="trangThai<?php echo $supplier['maNCC'] ?>" name="trangThai" aria-label="Default select example" required>
+                                                                <option value="1">Hoạt động</option>
+                                                                <option value="0">Khóa</option>
+                                                            </select>
+    
+                                                        </div>
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" id="edit-close-btn<?php echo $supplier["maNCC"] ?>" data-bs-dismiss="modal">Huỷ</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Lưu</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!--- End Modal Edit Supplier -->
+
+                                <!-- Begin Modal Unlock Supplier -->
+                                <?php if($supplier['trangThai'] != 1): ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalUnlockSuppliers<?php echo $supplier['maNCC'] ?>" 
+                                        class="text-yellow-500 hover:text-yellow-700 mr-2"
+                                    >
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalUnlockSuppliers<?php echo $supplier['maNCC'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Unlock nhà cung cấp</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="suppliers/unlock" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maNCC" name="maNCC"  value="<?php echo $supplier['maNCC'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn mở khóa nhà cung cấp <?php echo $supplier['tenNCC'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Có</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Begin Modal Unlock Supplier -->
+
+                                <!-- Begin Modal Delete Supplier -->
+                                <?php if($supplier['trangThai'] != 0): ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalDeleteSupplier<?php echo $supplier['maNCC'] ?>" 
+                                        class="text-red-500 hover:text-red-700"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalDeleteSupplier<?php echo $supplier['maNCC'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Delete nhà cung cấp</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="suppliers/delete" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maNCC" name="maNCC"  value="<?php echo $supplier['maNCC'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn xoá nhà cung cấp <?php echo $supplier['tenNCC'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Có</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Begin Modal Delete Supplier -->
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -53,101 +231,58 @@
     </div>
 </div>
 
-<!-- Modal Thêm/Sửa -->
-<div id="supplierModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Thêm nhà cung cấp mới</h3>
-            <form id="supplierForm" class="mt-4">
-                <input type="hidden" id="maNCC" name="maNCC" value="">
-                <div class="mt-2">
-                    <label for="tenNCC" class="block text-sm font-medium text-gray-700">Tên nhà cung cấp</label>
-                    <input type="text" 
-                           id="tenNCC" 
-                           name="tenNCC" 
-                           required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-                <div class="mt-2">
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" 
-                           id="email" 
-                           name="email" 
-                           required
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-                <div class="mt-2">
-                    <label for="diaChi" class="block text-sm font-medium text-gray-700">Địa chỉ</label>
-                    <textarea id="diaChi" 
-                              name="diaChi" 
-                              required
-                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button type="button" 
-                            onclick="closeModal()"
-                            class="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                        Hủy
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                        Lưu
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <script>
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Thêm nhà cung cấp mới';
-    document.getElementById('maNCC').value = '';
-    document.getElementById('tenNCC').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('diaChi').value = '';
-    document.getElementById('supplierModal').classList.remove('hidden');
-}
+// RESET VALUES KHI ĐÓNG FORM THÊM SẢN PHẨM 
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('modalAddSupplier').addEventListener('hidden.bs.modal', function () {
+        // Reset toàn bộ form
+        var form = document.querySelector('#modalAddSupplier form');
+        form.reset();
+        form.classList.remove('was-validated');
 
-function openEditModal(supplier) {
-    document.getElementById('modalTitle').textContent = 'Sửa nhà cung cấp';
-    document.getElementById('maNCC').value = supplier.maNCC;
-    document.getElementById('tenNCC').value = supplier.tenNCC;
-    document.getElementById('email').value = supplier.email;
-    document.getElementById('diaChi').value = supplier.diaChi;
-    document.getElementById('supplierModal').classList.remove('hidden');
-}
-
-function closeModal() {
-    document.getElementById('supplierModal').classList.add('hidden');
-}
-
-function deleteSupplier(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa nhà cung cấp này?')) {
-        window.location.href = `${BASE_URL}/admin/suppliers/delete/${id}`;
-    }
-}
-
-document.getElementById('supplierForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const id = document.getElementById('maNCC').value;
-    const url = id ? `${BASE_URL}/admin/suppliers/edit/${id}` : `${BASE_URL}/admin/suppliers/add`;
-    
-    fetch(url, {
-        method: 'POST',
-        body: new FormData(this)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.reload();
-        } else {
-            alert(data.message || 'Có lỗi xảy ra');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra');
+        // Xóa trạng thái validation lỗi (nếu có)
+        var invalidFields = document.querySelectorAll('.needs-validation .is-invalid');
+        invalidFields.forEach(function (field) {
+            field.classList.remove('is-invalid');
+        });
     });
 });
-</script> 
+
+
+// VALIDATE FORMS
+var forms = document.querySelectorAll('.needs-validation');
+Array.prototype.slice.call(forms) // Chuyển đổi NodeList thành mảng:
+    .forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+  
+          form.classList.add('was-validated')
+        }, false)
+    });
+
+// GÁN GIÁ TRỊ VÀO MODAL SỬA SẢN PHẨM    
+document.addEventListener("DOMContentLoaded", function () {
+    let editButtons = document.querySelectorAll(".edit-supplier-btn");
+    
+    editButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            let maNCC = btn.getAttribute("data-maNCC");
+            let tenNCC = btn.getAttribute("data-tenNCC");
+            let email = btn.getAttribute("data-email");
+            let diaChi = btn.getAttribute("data-diaChi");
+            let trangThai = btn.getAttribute("data-trangThai");
+
+            // Gán giá trị vào input trong modal
+            document.getElementById("tenNCC" + maNCC).value = tenNCC;
+            document.getElementById("email" + maNCC).value = email;
+            document.getElementById("diaChi" + maNCC).value = diaChi;
+            document.getElementById("trangThai" + maNCC).value = trangThai;
+        });
+    });
+});
+</script>
+

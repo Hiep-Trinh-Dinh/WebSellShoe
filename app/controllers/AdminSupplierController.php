@@ -1,5 +1,6 @@
 <?php
 class AdminSupplierController extends BaseController {
+    private $data = [];
     private $supplierModel;
 
     public function __construct() {
@@ -9,16 +10,25 @@ class AdminSupplierController extends BaseController {
             exit();
         }
         $this->supplierModel = $this->loadModel('Supplier');
+        $this->generator();
+    }
+
+    public function generator() {
+        $suppliers = $this->supplierModel->getAll();
+        $this->data['content'] = 'admin/suppliers/index.php';
+        $this->data['title'] = 'Quản lý nhà cung cấp';  
+        $this->data['currentPage'] = 'suppliers';
+        $this->data['suppliers'] = $suppliers;
     }
 
     public function index() {
-        $suppliers = $this->supplierModel->getAll();
-        $this->view('admin/layouts/main', [
-            'content' => 'admin/suppliers/index.php',
-            'title' => 'Quản lý nhà cung cấp',
-            'currentPage' => 'suppliers',
-            'suppliers' => $suppliers
-        ]);
+        $this->view('admin/layouts/main', $this->data);
+        // $this->view('admin/layouts/main', [
+        //     'content' => 'admin/suppliers/index.php',
+        //     'title' => 'Quản lý nhà cung cấp',
+        //     'currentPage' => 'suppliers',
+        //     'suppliers' => $suppliers
+        // ]);
     }
 
     public function add() {
@@ -39,15 +49,17 @@ class AdminSupplierController extends BaseController {
         }
     }
 
-    public function edit($id) {
+    public function edit() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $data = [
+                'maNCC' => $_POST['maNCC'],
                 'tenNCC' => $_POST['tenNCC'],
                 'email' => $_POST['email'],
-                'diaChi' => $_POST['diaChi']
+                'diaChi' => $_POST['diaChi'],
+                'trangThai' => $_POST['trangThai']
             ];
 
-            if ($this->supplierModel->update($id, $data)) {
+            if ($this->supplierModel->update($data['maNCC'],$data)) {
                 $_SESSION['success'] = 'Cập nhật nhà cung cấp thành công';
                 header('Location: ' . BASE_URL . '/admin/suppliers');
                 exit();
@@ -57,13 +69,31 @@ class AdminSupplierController extends BaseController {
         }
     }
 
-    public function delete($id) {
-        if ($this->supplierModel->delete($id)) {
-            $_SESSION['success'] = 'Xóa nhà cung cấp thành công';
-        } else {
-            $_SESSION['error'] = 'Xóa nhà cung cấp thất bại';
+    public function delete() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id = $_POST['maNCC'];
+        
+            if ($this->supplierModel->delete($id)) {
+                $_SESSION['success'] = 'Xóa nhà cung cấp thành công';
+            } else {
+                $_SESSION['error'] = 'Xóa nhà cung cấp thất bại';
+            }
+            header('Location: ' . BASE_URL . '/admin/suppliers');
+            exit();
         }
-        header('Location: ' . BASE_URL . '/admin/suppliers');
-        exit();
+    }
+
+    public function unlock() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id = $_POST['maNCC'];
+        
+            if ($this->supplierModel->unlock($id)) {
+                $_SESSION['success'] = 'Mở khoá nhà cung cấp thành công';
+            } else {
+                $_SESSION['error'] = 'Mở khoá nhà cung cấp thất bại';
+            }
+            header('Location: ' . BASE_URL . '/admin/suppliers');
+            exit();
+        }
     }
 } 

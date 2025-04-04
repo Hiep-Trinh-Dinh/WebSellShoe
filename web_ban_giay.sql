@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS NhaCungCap (
     maNCC INT AUTO_INCREMENT PRIMARY KEY,
     tenNCC VARCHAR(50),
     email VARCHAR(50),
-    diaChi VARCHAR(50)
+    diaChi VARCHAR(50),
+    trangThai INT DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS LoaiGiay (
@@ -84,16 +85,6 @@ CREATE TABLE IF NOT EXISTS ChiTietHoaDon (
     FOREIGN KEY (maHD) REFERENCES HoaDon(maHD),
     FOREIGN KEY (maGiay) REFERENCES Giay(maGiay)
 );
-
-
-
-
-
-
-
-
-
-
 
 
 
