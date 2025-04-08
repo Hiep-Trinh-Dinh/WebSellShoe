@@ -39,13 +39,23 @@ class AdminSupplierController extends BaseController {
                 'diaChi' => $_POST['diaChi']
             ];
 
-            if ($this->supplierModel->add($data)) {
-                $_SESSION['success'] = 'Thêm nhà cung cấp thành công';
-                header('Location: ' . BASE_URL . '/admin/suppliers');
+            $isAddProduct = $this->supplierModel->add($data);
+            if ($isAddProduct) {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Thêm thành công');
+                        window.location.href = '" . BASE_URL . "/admin/suppliers';
+                    </script>";
                 exit();
-            } else {
-                $_SESSION['error'] = 'Thêm nhà cung cấp thất bại';
             }
+
+            // if ($this->supplierModel->add($data)) {
+            //     $_SESSION['success'] = 'Thêm nhà cung cấp thành công';
+            //     header('Location: ' . BASE_URL . '/admin/suppliers');
+            //     exit();
+            // } else {
+            //     $_SESSION['error'] = 'Thêm nhà cung cấp thất bại';
+            // }
         }
     }
 
@@ -59,13 +69,23 @@ class AdminSupplierController extends BaseController {
                 'trangThai' => $_POST['trangThai']
             ];
 
-            if ($this->supplierModel->update($data['maNCC'],$data)) {
-                $_SESSION['success'] = 'Cập nhật nhà cung cấp thành công';
-                header('Location: ' . BASE_URL . '/admin/suppliers');
+            $isEditSuppliers = $this->supplierModel->update($data['maNCC'], $data);
+            if ($isEditSuppliers) {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Sửa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/suppliers';
+                    </script>";
                 exit();
-            } else {
-                $_SESSION['error'] = 'Cập nhật nhà cung cấp thất bại';
             }
+
+            // if ($this->supplierModel->update($data['maNCC'],$data)) {
+            //     $_SESSION['success'] = 'Cập nhật nhà cung cấp thành công';
+            //     header('Location: ' . BASE_URL . '/admin/suppliers');
+            //     exit();
+            // } else {
+            //     $_SESSION['error'] = 'Cập nhật nhà cung cấp thất bại';
+            // }
         }
     }
 
@@ -73,13 +93,23 @@ class AdminSupplierController extends BaseController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['maNCC'];
         
-            if ($this->supplierModel->delete($id)) {
-                $_SESSION['success'] = 'Xóa nhà cung cấp thành công';
-            } else {
-                $_SESSION['error'] = 'Xóa nhà cung cấp thất bại';
+            $isDeleteSupplier = $this->supplierModel->delete($id);
+            if ($isDeleteSupplier) {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Xoá thành công');
+                        window.location.href = '" . BASE_URL . "/admin/suppliers';
+                    </script>";
+                exit();
             }
-            header('Location: ' . BASE_URL . '/admin/suppliers');
-            exit();
+
+            // if ($this->supplierModel->delete($id)) {
+            //     $_SESSION['success'] = 'Xóa nhà cung cấp thành công';
+            // } else {
+            //     $_SESSION['error'] = 'Xóa nhà cung cấp thất bại';
+            // }
+            // header('Location: ' . BASE_URL . '/admin/suppliers');
+            // exit();
         }
     }
 
@@ -87,13 +117,23 @@ class AdminSupplierController extends BaseController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['maNCC'];
         
-            if ($this->supplierModel->unlock($id)) {
-                $_SESSION['success'] = 'Mở khoá nhà cung cấp thành công';
-            } else {
-                $_SESSION['error'] = 'Mở khoá nhà cung cấp thất bại';
+            $isUnlockSupplier = $this->supplierModel->unlock($id);
+            if ($isUnlockSupplier) {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Mở khoá thành công');
+                        window.location.href = '" . BASE_URL . "/admin/suppliers';
+                    </script>";
+                exit();
             }
-            header('Location: ' . BASE_URL . '/admin/suppliers');
-            exit();
+
+            // if ($this->supplierModel->unlock($id)) {
+            //     $_SESSION['success'] = 'Mở khoá nhà cung cấp thành công';
+            // } else {
+            //     $_SESSION['error'] = 'Mở khoá nhà cung cấp thất bại';
+            // }
+            // header('Location: ' . BASE_URL . '/admin/suppliers');
+            // exit();
         }
     }
 } 
