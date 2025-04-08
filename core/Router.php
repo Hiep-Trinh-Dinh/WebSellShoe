@@ -18,23 +18,14 @@ class Router {
             $params = $route['params'] ?? [];
             
             // Kiểm tra xem controller có tồn tại không
-            $controllerFile = 'app/controllers/' . $controller . '.php';
-            if (file_exists($controllerFile)) {
-                require_once $controllerFile;
-                
-                // Tạo instance của controller
-                $controllerInstance = new $controller();
-                
-                // Kiểm tra xem action có tồn tại không
-                if (method_exists($controllerInstance, $action)) {
-                    // Gọi action với params
-                    call_user_func_array([$controllerInstance, $action], [$params]);
-                } else {
-                    error_log("Action not found: " . $action);
-                    $this->error404();
-                }
+            $controllerFile = $this->loadController($controller);
+            
+            // Kiểm tra xem action có tồn tại không
+            if (method_exists($controllerFile, $action)) {
+                // Gọi action với params
+                call_user_func_array([$controllerFile, $action], [$params]);
             } else {
-                error_log("Controller not found: " . $controller);
+                error_log("Action not found: " . $action);
                 $this->error404();
             }
         } else {
@@ -152,6 +143,19 @@ class Router {
 
     private function error404() {
         $this->handleNotFound();
+    }
+
+    private function loadController($controller) {
+        // Thêm namespace Admin nếu controller bắt đầu bằng "Admin\"
+        $controllerFile = str_replace('\\', '/', $controller);
+        $controllerPath = 'app/controllers/' . $controllerFile . '.php';
+        
+        if (file_exists($controllerPath)) {
+            require_once $controllerPath;
+            return new $controller();
+        }
+        
+        throw new Exception("Controller {$controller} không tồn tại");
     }
 }
 ?> 

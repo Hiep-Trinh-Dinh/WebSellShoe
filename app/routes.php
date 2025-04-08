@@ -68,6 +68,20 @@ class Routes {
         'admin/suppliers/edit' => ['controller' => 'AdminSupplierController', 'action' => 'edit'],
         'admin/suppliers/delete' => ['controller' => 'AdminSupplierController', 'action' => 'delete'],
         'admin/suppliers/unlock' => ['controller' => 'AdminSupplierController', 'action' => 'unlock'],
+        
+        'admin/dashboard' => ['controller' => 'Admin\DashboardController', 'action' => 'index'],
+        'admin/dashboard/top-customers' => ['controller' => 'Admin\DashboardController', 'action' => 'getTopCustomers'],
+        'admin/orders/get-order-detail/:id' => [
+            'controller' => 'Admin\OrderController',
+            'action' => 'getOrderDetail',
+            'params' => ['id']
+        ],
+        'admin/dashboard/customer-orders/([0-9]+)' => [
+            'controller' => 'Admin\DashboardController',
+            'action' => 'customerOrders',
+            'params' => ['id']
+        ],
+        'admin/dashboard/search-orders' => ['controller' => 'Admin\DashboardController', 'action' => 'searchOrders'],
     ];
 
     public static function getRoutes() {

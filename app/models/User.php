@@ -170,12 +170,39 @@ class User extends BaseModel {
         return $stmt->execute($data);
     }
 
-    public function getUserById($id) {
-        $sql = "SELECT * FROM TaiKhoan WHERE maTK = :id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+    public function getUserById($userId) {
+        try {
+            // Debug để kiểm tra userId
+            error_log("Getting user with ID: " . $userId);
+
+            $sql = "SELECT * FROM TaiKhoan WHERE maTK = :userId";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Debug để kiểm tra kết quả
+            error_log("User data: " . print_r($user, true));
+            
+            if (!$user) {
+                error_log("No user found with ID: " . $userId);
+                return null;
+            }
+
+            // Đảm bảo các trường không bị null
+            $user['email'] = $user['email'] ?? '';
+            $user['soDT'] = $user['soDT'] ?? '';
+            $user['diaChi'] = $user['diaChi'] ?? '';
+            
+            return $user;
+        } catch (PDOException $e) {
+            error_log("Error in getUserById: " . $e->getMessage());
+            error_log("SQL: " . $sql);
+            error_log("User ID: " . $userId);
+            throw new Exception("Lỗi khi lấy thông tin người dùng: " . $e->getMessage());
+        }
     }
 
     public function updateUser($id, $data) {
@@ -210,6 +237,18 @@ class User extends BaseModel {
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'];
+    }
+
+    public function getTotalUsers() {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM TaiKhoan WHERE maQuyen = 2";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+        } catch (PDOException $e) {
+            error_log("Error in getTotalUsers: " . $e->getMessage());
+            return 0;
+        }
     }
 }
 ?> 
