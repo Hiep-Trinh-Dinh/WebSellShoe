@@ -65,8 +65,17 @@ class Routes {
         
         'admin/suppliers' => ['controller' => 'AdminSupplierController', 'action' => 'index'],
         'admin/suppliers/add' => ['controller' => 'AdminSupplierController', 'action' => 'add'],
-        'admin/suppliers/edit' => ['controller' => 'AdminSupplierController', 'action' => 'edit'],
+        'admin/suppliers/update/([0-9]+)' => [
+            'controller' => 'AdminSupplierController',
+            'action' => 'update',
+            'params' => ['id']
+        ],
         'admin/suppliers/delete' => ['controller' => 'AdminSupplierController', 'action' => 'delete'],
+        'admin/suppliers/get/([0-9]+)' => [
+            'controller' => 'AdminSupplierController',
+            'action' => 'get',
+            'params' => ['id']
+        ],
         
         'admin/dashboard' => ['controller' => 'Admin\DashboardController', 'action' => 'index'],
         'admin/dashboard/top-customers' => ['controller' => 'Admin\DashboardController', 'action' => 'getTopCustomers'],

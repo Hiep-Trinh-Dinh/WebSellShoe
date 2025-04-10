@@ -17,13 +17,25 @@ class Router {
             $action = $route['action'];
             $params = $route['params'] ?? [];
             
+            // Debug logging
+            error_log("Dispatching to controller: " . $controller . ", action: " . $action);
+            error_log("Parameters: " . print_r($params, true));
+            
             // Kiểm tra xem controller có tồn tại không
             $controllerFile = $this->loadController($controller);
             
             // Kiểm tra xem action có tồn tại không
             if (method_exists($controllerFile, $action)) {
-                // Gọi action với params
-                call_user_func_array([$controllerFile, $action], [$params]);
+                // Nếu params là mảng associative, truyền từng tham số riêng lẻ
+                if (is_array($params) && !empty($params)) {
+                    // Debug logging
+                    error_log("Calling " . $action . " with params: " . print_r(array_values($params), true));
+                    call_user_func_array([$controllerFile, $action], array_values($params));
+                } else {
+                    // Debug logging
+                    error_log("Calling " . $action . " with param: " . print_r($params, true));
+                    call_user_func_array([$controllerFile, $action], [$params]);
+                }
             } else {
                 error_log("Action not found: " . $action);
                 $this->error404();
@@ -94,47 +106,54 @@ class Router {
         // Loại bỏ các tham số query string
         $url = strtok($url, '?');
         
+        // Debug
+        error_log("URL after processing: " . $url);
+        
         // Tách URL thành các phần
         $parts = explode('/', trim($url, '/'));
-        
-        // Kiểm tra route admin/orders/view/{id}
-        if (count($parts) >= 4 && 
-            $parts[0] === 'admin' && 
-            $parts[1] === 'orders' && 
-            $parts[2] === 'view') {
-            
-            return [
-                'controller' => 'AdminOrderController',
-                'action' => 'viewOrder',
-                'params' => ['id' => $parts[3]]
-            ];
-        }
         
         foreach ($this->routes as $pattern => $route) {
             // Thêm dấu ^ vào đầu và $ vào cuối để đảm bảo khớp chính xác
             $pattern = '#^' . $pattern . '$#';
             
             if (preg_match($pattern, $url, $matches)) {
+                // Debug
+                error_log("Route matched: " . $pattern);
+                error_log("Matches: " . print_r($matches, true));
+                
                 // Xóa phần tử đầu tiên (toàn bộ chuỗi khớp)
                 array_shift($matches);
                 
                 $controller = $route['controller'];
                 $action = $route['action'];
                 
-                // Kiểm tra và tạo controller
-                if (!class_exists($controller)) {
-                    throw new Exception("Controller {$controller} không tồn tại");
+                // Nếu có params trong route, sử dụng chúng
+                if (isset($route['params'])) {
+                    $params = [];
+                    foreach ($route['params'] as $key => $paramName) {
+                        // Debug
+                        error_log("Mapping param: " . $paramName . " at key " . $key . " from matches");
+                        $params[$paramName] = isset($matches[$key]) ? $matches[$key] : null;
+                    }
+                    
+                    // Debug
+                    error_log("Final params with names: " . print_r($params, true));
+                    
+                    return [
+                        'controller' => $controller,
+                        'action' => $action,
+                        'params' => $params
+                    ];
                 }
                 
-                $controllerInstance = new $controller();
+                // Debug
+                error_log("Final params without names: " . print_r($matches, true));
                 
-                // Kiểm tra phương thức tồn tại
-                if (!method_exists($controllerInstance, $action)) {
-                    throw new Exception("Action {$action} không tồn tại trong controller {$controller}");
-                }
-                
-                // Gọi phương thức với các tham số từ URL
-                return call_user_func_array([$controllerInstance, $action], [$matches]);
+                return [
+                    'controller' => $controller,
+                    'action' => $action,
+                    'params' => $matches
+                ];
             }
         }
 
@@ -146,16 +165,34 @@ class Router {
     }
 
     private function loadController($controller) {
-        // Thêm namespace Admin nếu controller bắt đầu bằng "Admin\"
-        $controllerFile = str_replace('\\', '/', $controller);
-        $controllerPath = 'app/controllers/' . $controllerFile . '.php';
+        // Xử lý namespace
+        $controllerParts = explode('\\', $controller);
+        $controllerName = end($controllerParts);
+        $controllerPath = 'app/controllers/';
         
-        if (file_exists($controllerPath)) {
-            require_once $controllerPath;
-            return new $controller();
+        // Nếu có namespace, thêm thư mục tương ứng
+        if (count($controllerParts) > 1) {
+            $controllerPath .= implode('/', array_slice($controllerParts, 0, -1)) . '/';
         }
         
-        throw new Exception("Controller {$controller} không tồn tại");
+        $controllerPath .= $controllerName . '.php';
+        
+        // Debug để xem đường dẫn
+        error_log("Trying to load controller from: " . $controllerPath);
+        
+        if (!file_exists($controllerPath)) {
+            error_log("Controller file not found at: " . $controllerPath);
+            throw new Exception("Controller {$controller} không tồn tại");
+        }
+        
+        require_once $controllerPath;
+        
+        if (!class_exists($controller)) {
+            error_log("Controller class {$controller} not found in file");
+            throw new Exception("Controller class {$controller} không tồn tại");
+        }
+        
+        return new $controller();
     }
 }
 ?> 
