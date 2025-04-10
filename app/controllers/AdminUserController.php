@@ -26,28 +26,39 @@ class AdminUserController extends BaseController {
 
     public function add() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['tenTK'] ?? '';
-            $password = $_POST['matKhau'] ?? '';
-            $role = $_POST['maQuyen'] ?? 2;
-            $status = $_POST['trangThai'] ?? 1;
+            try {
+                $username = $_POST['tenTK'] ?? '';
+                $password = $_POST['matKhau'] ?? '';
+                $role = $_POST['maQuyen'] ?? 2;
+                $status = $_POST['trangThai'] ?? 1;
 
-            // Kiểm tra username đã tồn tại chưa
-            if ($this->userModel->checkUsername($username)) {
-                echo json_encode(['success' => false, 'message' => 'Tên đăng nhập đã tồn tại']);
-                exit();
-            }
+                // Validate input
+                if (empty($username) || empty($password)) {
+                    throw new Exception('Vui lòng điền đầy đủ thông tin');
+                }
 
-            $data = [
-                'tenTK' => $username,
-                'matKhau' => md5($password), // Trong thực tế nên dùng password_hash()
-                'maQuyen' => $role,
-                'trangThai' => $status
-            ];
+                // Kiểm tra username đã tồn tại chưa
+                if ($this->userModel->checkUsername($username)) {
+                    throw new Exception('Tên đăng nhập đã tồn tại');
+                }
 
-            if ($this->userModel->add($data)) {
-                echo json_encode(['success' => true]);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Thêm người dùng thất bại']);
+                $data = [
+                    'tenTK' => $username,
+                    'matKhau' => md5($password),
+                    'maQuyen' => $role,
+                    'trangThai' => $status
+                ];
+
+                if ($this->userModel->add($data)) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    throw new Exception('Thêm người dùng thất bại');
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
             }
             exit();
         }

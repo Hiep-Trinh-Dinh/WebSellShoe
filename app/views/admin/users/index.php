@@ -18,7 +18,7 @@
                         <h5 class="modal-title">Thêm User</h5>
                     </div>
                     <div class="modal-body">
-                        <form action="users/add" method="POST" class="needs-validation" novalidate>
+                        <form id="addUserForm" class="needs-validation" novalidate>
                             <div class="mb-3">
                                 <label for="tenTK" class="col-form-label">Tên User:</label>
                                 <input type="text" class="form-control" id="tenTK" name="tenTK" required>
@@ -46,8 +46,8 @@
                             </div>
                             
                             <div class="mt-3" style="float: right;">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Thêm</button>
                             </div>
                         </form>
                     </div>
@@ -184,6 +184,45 @@ document.addEventListener("DOMContentLoaded", function () {
             
 
         }); 
+    });
+});
+
+// Thêm xử lý submit form bằng AJAX
+document.getElementById('addUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!this.checkValidity()) {
+        e.stopPropagation();
+        this.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(this);
+    
+    fetch('<?php echo BASE_URL; ?>/admin/users/add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Đóng modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAddUser'));
+            modal.hide();
+            
+            // Reset form
+            this.reset();
+            this.classList.remove('was-validated');
+            
+            // Reload trang để cập nhật danh sách
+            location.reload();
+        } else {
+            alert(data.message || 'Có lỗi xảy ra khi thêm người dùng');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thêm người dùng');
     });
 });
 </script>
