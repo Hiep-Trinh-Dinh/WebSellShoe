@@ -61,6 +61,7 @@ class Routes {
         'admin/users/add' => ['controller' => 'AdminUserController', 'action' => 'add'],
         'admin/users/edit' => ['controller' => 'AdminUserController', 'action' => 'edit'],
         'admin/users/delete' => ['controller' => 'AdminUserController', 'action' => 'delete'],
+        'admin/users/unlock' => ['controller' => 'AdminUserController', 'action' => 'unlock'],
         'admin/users/changePassword' => ['controller' => 'AdminUserController', 'action' => 'changePassword'],
         
         'admin/suppliers' => ['controller' => 'AdminSupplierController', 'action' => 'index'],

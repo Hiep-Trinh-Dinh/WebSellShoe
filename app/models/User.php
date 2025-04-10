@@ -250,5 +250,24 @@ class User extends BaseModel {
             return 0;
         }
     }
+
+    public function changeStatus($id, $status) {
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maTK = :id";
+        $stmt = $this->db->prepare($sql);
+        
+        // Debug
+        error_log("Changing user status: ID = $id, Status = $status");
+        
+        $result = $stmt->execute([
+            ':trangThai' => $status,
+            ':id' => $id
+        ]);
+        
+        if (!$result) {
+            error_log("Error changing status: " . print_r($stmt->errorInfo(), true));
+        }
+        
+        return $result;
+    }
 }
 ?> 

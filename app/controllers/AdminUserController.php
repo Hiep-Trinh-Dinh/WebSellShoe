@@ -106,19 +106,58 @@ class AdminUserController extends BaseController {
         }
     }
 
-    public function delete($id) {
-        // Không cho phép xóa tài khoản admin
+    public function delete() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/admin/users');
+            exit();
+        }
+        
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        
+        // Không cho phép khóa tài khoản admin
         $user = $this->userModel->getById($id);
-        if ($user['maQuyen'] == 1) {
-            $_SESSION['error'] = 'Không thể xóa tài khoản admin';
+        if (!$user) {
+            $_SESSION['error'] = 'Không tìm thấy tài khoản';
+            header('Location: ' . BASE_URL . '/admin/users');
+            exit();
+        }
+        
+        if ($user->getMaQuyen() == 1) {
+            $_SESSION['error'] = 'Không thể khóa tài khoản admin';
             header('Location: ' . BASE_URL . '/admin/users');
             exit();
         }
 
-        if ($this->userModel->delete($id)) {
-            $_SESSION['success'] = 'Xóa người dùng thành công';
+        // Thay đổi trạng thái tài khoản thành khóa (0) thay vì xóa
+        if ($this->userModel->changeStatus($id, 0)) {
+            $_SESSION['success'] = 'Khóa tài khoản thành công';
         } else {
-            $_SESSION['error'] = 'Xóa người dùng thất bại';
+            $_SESSION['error'] = 'Khóa tài khoản thất bại';
+        }
+        header('Location: ' . BASE_URL . '/admin/users');
+        exit();
+    }
+
+    public function unlock() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/admin/users');
+            exit();
+        }
+        
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        
+        $user = $this->userModel->getById($id);
+        if (!$user) {
+            $_SESSION['error'] = 'Không tìm thấy tài khoản';
+            header('Location: ' . BASE_URL . '/admin/users');
+            exit();
+        }
+        
+        // Mở khóa tài khoản bằng cách đặt trạng thái thành 1 (hoạt động)
+        if ($this->userModel->changeStatus($id, 1)) {
+            $_SESSION['success'] = 'Mở khóa tài khoản thành công';
+        } else {
+            $_SESSION['error'] = 'Mở khóa tài khoản thất bại';
         }
         header('Location: ' . BASE_URL . '/admin/users');
         exit();
