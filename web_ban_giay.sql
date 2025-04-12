@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS HoaDon (
     tongSoLuong INT,
     tongTien INT,
     maTK INT,
+    thanhToan INT,
+    diaChi VARCHAR(255), 
     trangThai INT,
     FOREIGN KEY (maTK) REFERENCES TaiKhoan(maTK)
 );
@@ -77,6 +79,7 @@ CREATE TABLE IF NOT EXISTS HoaDon (
 CREATE TABLE IF NOT EXISTS ChiTietHoaDon (
     maHD INT,
     maGiay INT,
+    size INT,
     giaBan INT,
     soLuong INT,
     thanhTien INT,
