@@ -4,9 +4,10 @@
         <div class="space-y-4">
             <div class="aspect-square overflow-hidden rounded-lg border">
                 <?php if ($product->getHinhAnh()): ?>
-                    <img src="data:image/jpeg;base64,<?php echo base64_encode($product->getHinhAnh()); ?>"
-                         alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
-                         class="h-full w-full object-cover">
+                    <img 
+                        src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product->getHinhAnh()) ?>"
+                        alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
+                        class="h-full w-full object-cover">
                 <?php else: ?>
                     <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
                          alt="No Image"
@@ -17,9 +18,10 @@
                 <?php for ($i = 0; $i < 4; $i++): ?>
                 <div class="aspect-square cursor-pointer overflow-hidden rounded-lg border hover:border-yellow-500">
                     <?php if ($product->getHinhAnh()): ?>
-                        <img src="data:image/jpeg;base64,<?php echo base64_encode($product->getHinhAnh()); ?>"
-                             alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
-                             class="h-full w-full object-cover">
+                        <img 
+                            src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product->getHinhAnh()) ?>"
+                            alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
+                            class="h-full w-full object-cover">
                     <?php else: ?>
                         <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
                              alt="No Image"
@@ -33,7 +35,9 @@
         <!-- Product Info -->
         <div class="space-y-6">
             <div>
-                <h1 class="text-3xl font-bold"><?php echo htmlspecialchars($product->getTenGiay()); ?></h1>
+                <h1 class="text-3xl font-bold">
+                    <?php echo htmlspecialchars($product->getTenGiay()); ?>
+                </h1>
                 <p class="text-lg text-gray-500"><?php echo htmlspecialchars($product->getTenLoaiGiay()); ?></p>
             </div>
 
@@ -62,29 +66,47 @@
                 <div>
                     <h3 class="text-sm font-medium">Size</h3>
                     <div class="mt-2 grid grid-cols-4 gap-2">
-                        <?php
-                        $sizes = [36, 37, 38, 39, 40, 41, 42, 43];
-                        foreach ($sizes as $size):
-                        ?>
-                        <label class="flex cursor-pointer items-center justify-center rounded-md border py-2 <?php echo $size == $product->getSize() ? 'border-yellow-500 bg-yellow-50' : 'hover:border-yellow-500'; ?>">
-                            <input type="radio" name="size" value="<?php echo $size; ?>" class="sr-only" 
-                                   <?php echo $size == $product->getSize() ? 'checked' : ''; ?>>
-                            <span class="text-sm"><?php echo $size; ?></span>
+                        <label class="flex cursor-pointer items-center justify-center rounded-md border py-2 border-yellow-500 bg-yellow-50">
+                            <input 
+                                type="radio" 
+                                name="size" 
+                                value="<?php echo $product->getSize() ?>" 
+                                class="sr-only" 
+                            >
+                            <span class="text-sm"><?php echo $product->getSize() ?></span>
                         </label>
-                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-medium">Tồn kho</h3>
+                    <div class="mt-2 flex items-center gap-2">
+                        <input 
+                            readonly
+                            type="number" id="tonKho" 
+                            value="<?php echo $product->getTonKho() ? $product->getTonKho() : 0  ?>"
+                            class="h-10 w-20 rounded-md border text-center"
+                        >
                     </div>
                 </div>
 
                 <div>
                     <h3 class="text-sm font-medium">Số lượng</h3>
                     <div class="mt-2 flex items-center gap-2">
+                        <button 
+                            class="flex h-10 w-10 items-center justify-center rounded-md border"
+                            onclick="updateQuantity('decrease')">
+                            -
+                        </button>
+                        <input 
+                            type="number" id="quantity" value="1" min="1" 
+                            max="<?php echo $product->getTonKho(); ?>"
+                            class="h-10 w-20 rounded-md border text-center"
+                        >
                         <button class="flex h-10 w-10 items-center justify-center rounded-md border"
-                                onclick="updateQuantity('decrease')">-</button>
-                        <input type="number" id="quantity" value="1" min="1" 
-                               max="<?php echo $product->getTonKho(); ?>"
-                               class="h-10 w-20 rounded-md border text-center">
-                        <button class="flex h-10 w-10 items-center justify-center rounded-md border"
-                                onclick="updateQuantity('increase')">+</button>
+                                onclick="updateQuantity('increase')">
+                            +
+                        </button>
                     </div>
                 </div>
 
@@ -110,6 +132,8 @@
 </div>
 
 <script>
+const BASE_URL = window.location.origin + "/Web2";
+
 function updateQuantity(action) {
     const input = document.getElementById('quantity');
     const currentValue = parseInt(input.value);
@@ -122,26 +146,60 @@ function updateQuantity(action) {
     }
 }
 
+
+
+
 function addToCart(productId) {
     const quantity = document.getElementById('quantity').value;
-    const size = document.querySelector('input[name="size"]:checked').value;
     
-    fetch(`${BASE_URL}/cart/add`, {
+    fetch(BASE_URL + "/cart/add", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `productId=${productId}&quantity=${quantity}&size=${size}`
+        body: `productId=${productId}&quantity=${quantity}`
     })
-    .then(response => response.json())
+    .then(response => {
+        
+        return response.json();
+    })
     .then(data => {
-        if (data.success) {
-            alert('Đã thêm sản phẩm vào giỏ hàng');
-            if (data.cartCount) {
-                document.getElementById('cartCount').textContent = data.cartCount;
+        if (data.success) 
+        {
+            localStorage.setItem('showToast', 'success');
+            localStorage.setItem('toastMessage', 'Đã thêm sản phẩm vào giỏ hàng');
+            localStorage.setItem('cartItem', JSON.stringify(data.cartItem));
+            let productTemp = JSON.parse(data.cartItem.product);
+            let cartItems = JSON.parse(localStorage.getItem('cartItems')) || []; 
+            let needToPush = true;
+            if(cartItems.length > 0)
+            {
+                cartItems.forEach((item, index) => {
+                    const product = JSON.parse(item.product);
+                    if(product.maGiay == productTemp.maGiay)
+                    {
+                        item.quantity = parseInt(item.quantity) + parseInt(data.cartItem.quantity);
+                        needToPush = false;
+                    }
+                });
             }
-        } else {
-            alert(data.message || 'Có lỗi xảy ra');
+            if(needToPush)
+            {
+                cartItems.push({
+                    product: data.cartItem.product,
+                    quantity: parseInt(data.cartItem.quantity)
+                });
+            }
+
+
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            window.location.href = BASE_URL + "/products/detail/" + productId;
+        } 
+        else 
+        {
+            localStorage.setItem('showToast', 'error');
+            localStorage.setItem('toastMessage', data.message);
+            window.location.href = BASE_URL + "/products/detail/" + productId;
         }
     })
     .catch(error => {

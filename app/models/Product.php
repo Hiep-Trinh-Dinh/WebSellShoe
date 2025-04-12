@@ -10,6 +10,7 @@ class Product extends BaseModel {
     protected $giaBan;
     protected $tonKho;
     protected $hinhAnh;
+    protected $trangThai;
     protected $tenLoaiGiay; // Thuộc tính phụ từ bảng LoaiGiay
 
     // Getters
@@ -20,6 +21,7 @@ class Product extends BaseModel {
     public function getGiaBan() { return $this->giaBan; }
     public function getTonKho() { return $this->tonKho; }
     public function getHinhAnh() { return $this->hinhAnh; }
+    public function getTrangThai() { return $this->trangThai; }
     public function getTenLoaiGiay() { return $this->tenLoaiGiay; }
 
     // Setters
@@ -30,6 +32,7 @@ class Product extends BaseModel {
     public function setGiaBan($giaBan) { $this->giaBan = $giaBan; }
     public function setTonKho($tonKho) { $this->tonKho = $tonKho; }
     public function setHinhAnh($hinhAnh) { $this->hinhAnh = $hinhAnh; }
+    public function setTrangThai($trangThai) { $this->trangThai = $trangThai; }
     public function setTenLoaiGiay($tenLoaiGiay) { $this->tenLoaiGiay = $tenLoaiGiay; }
 
     // Chuyển đổi từ array sang object
@@ -42,6 +45,7 @@ class Product extends BaseModel {
             $this->giaBan = $data['giaBan'] ?? null;
             $this->tonKho = $data['tonKho'] ?? null;
             $this->hinhAnh = $data['hinhAnh'] ?? null;
+            $this->trangThai = $data['trangThai'] ?? null;
             $this->tenLoaiGiay = $data['tenLoaiGiay'] ?? null;
         }
         return $this;
@@ -57,16 +61,29 @@ class Product extends BaseModel {
             'giaBan' => $this->giaBan,
             'tonKho' => $this->tonKho,
             'hinhAnh' => $this->hinhAnh,
+            'trangThai' => $this->trangThai,
             'tenLoaiGiay' => $this->tenLoaiGiay
         ];
     }
 
     // Các phương thức truy vấn
+    public function getTonKhoByTenGiayAndSize($tenGiay, $size)
+    {
+        $sql = "SELECT tonKho FROM {$this->table} WHERE tenGiay = :tenGiay and size = :size";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':tenGiay' => $tenGiay,
+            ':size' => $size
+        ]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getAllProducts() {
         $sql = "SELECT g.*, lg.tenLoaiGiay 
                 FROM Giay g 
                 LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
-                ORDER BY g.maGiay DESC";
+                ORDER BY g.maGiay DESC
+                WHERE g.trangThai = 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $products = [];
@@ -111,6 +128,29 @@ class Product extends BaseModel {
         }
     }
 
+    public function getProductByIdArray($id) {
+        try {
+            $sql = "SELECT g.*, lg.tenLoaiGiay 
+                    FROM Giay g 
+                    LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
+                    WHERE g.maGiay = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($data) {
+                $product = new Product();
+                $product->mapFromArray($data);
+                return $product->toArray();;
+            }
+            return null;
+        } catch (PDOException $e) {
+            error_log("Error in getProductById: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function getRelatedProducts($categoryId, $currentProductId, $limit = 4) {
         $sql = "SELECT g.*, lg.tenLoaiGiay 
                 FROM Giay g 
@@ -136,7 +176,7 @@ class Product extends BaseModel {
             $sql = "SELECT g.*, lg.tenLoaiGiay 
                     FROM Giay g 
                     LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
-                    WHERE 1=1";
+                    WHERE g.trangThai = 1";
                     
             $params = [];
             
@@ -346,10 +386,10 @@ class Product extends BaseModel {
         ]);
     }
 
-    public function isTenGiayExists($tenGiay) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE tenGiay = :tenGiay";
+    public function isTenGiayExists($tenGiay, $size) {
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE tenGiay = :tenGiay and size = :size";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([':tenGiay' => $tenGiay]);
+        $stmt->execute([':tenGiay' => $tenGiay, ':size' => $size]);
         $count = $stmt->fetchColumn();
         return $count > 0;
     }
@@ -402,7 +442,7 @@ class Product extends BaseModel {
         ]);
     }
 
-    public function updateStock($id, $quantity) {
+    public function increaseStock($id, $quantity) {
         $sql = "UPDATE Giay SET tonKho = tonKho + :quantity WHERE maGiay = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
@@ -411,17 +451,13 @@ class Product extends BaseModel {
         ]);
     }
 
-    // Giữ lại một bản của mỗi method
-    public function getTotalProducts() {
-        try {
-            $sql = "SELECT COUNT(*) as total FROM Giay";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-        } catch (PDOException $e) {
-            error_log("Error in getTotalProducts: " . $e->getMessage());
-            return 0;
-        }
+    public function decreaseStock($id, $quantity) {
+        $sql = "UPDATE Giay SET tonKho = tonKho - :quantity WHERE maGiay = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':quantity' => $quantity,
+            ':id' => $id
+        ]);
     }
 }
 ?> 

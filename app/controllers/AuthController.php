@@ -32,12 +32,20 @@ class AuthController extends BaseController {
                 $_SESSION['username'] = $user->getTenTK();
                 $_SESSION['user_role'] = $user->getMaQuyen();
                 $_SESSION['success'] = 'Đăng nhập thành công!';
+
+                echo "<script> 
+                        localStorage.setItem('maTK', '" . $user->getMaTK() . "') 
+                    </script>";
                 
                 // Chuyển hướng dựa vào quyền
                 if ($user->getMaQuyen() == 1) {
-                    header('Location: ' . BASE_URL . '/admin');
+                    echo "<script> 
+                        window.location.href = '" . BASE_URL . "/admin'; 
+                    </script>";
                 } else {
-                    header('Location: ' . BASE_URL);
+                    echo "<script> 
+                        window.location.href = '" . BASE_URL . "/';
+                    </script>";
                 }
                 exit();
             } else {
@@ -104,7 +112,10 @@ class AuthController extends BaseController {
 
     public function logout() {
         session_destroy();
-        header('Location: ' . BASE_URL . '/login');
+        echo "<script> 
+                    localStorage.removeItem('maTK');
+                    window.location.href = '" . BASE_URL . "/login';
+            </script>";
         exit();
     }
 }

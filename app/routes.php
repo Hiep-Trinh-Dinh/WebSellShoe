@@ -17,12 +17,14 @@ class Routes {
         ],
         'products/category' => ['controller' => 'ProductController', 'action' => 'category'],
         'products/search' => ['controller' => 'ProductController', 'action' => 'search'],
+        'products/loadTonKho' => ['controller' => 'ProductController', 'action' => 'loadTonKho'],
         
         // Giỏ hàng
         'cart' => ['controller' => 'CartController', 'action' => 'index'],
         'cart/add' => ['controller' => 'CartController', 'action' => 'add'],
         'cart/update' => ['controller' => 'CartController', 'action' => 'update'],
         'cart/remove' => ['controller' => 'CartController', 'action' => 'remove'],
+        'cart/pay' => ['controller' => 'CartController', 'action' => 'pay'],
         
         // Tài khoản người dùng
         'user' => ['controller' => 'UserController', 'action' => 'index'],

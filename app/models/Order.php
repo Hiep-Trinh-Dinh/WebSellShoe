@@ -7,6 +7,8 @@ class Order extends BaseModel {
     protected $maTK;
     protected $ngayTao;
     protected $tongTien;
+    protected $thanhToan;
+    protected $diaChi;
     protected $trangThai;
     protected $items; // Cho các chi tiết đơn hàng
 
@@ -15,6 +17,8 @@ class Order extends BaseModel {
     public function getMaTK() { return $this->maTK; }
     public function getNgayTao() { return $this->ngayTao; }
     public function getTongTien() { return $this->tongTien; }
+    public function getThanhToan() { return $this->thanhToan; }
+    public function getDiaChi() { return $this->diaChi; }
     public function getTrangThai() { return $this->trangThai; }
     public function getItems() { return $this->items; }
 
@@ -23,6 +27,8 @@ class Order extends BaseModel {
     public function setMaTK($value) { $this->maTK = $value; }
     public function setNgayTao($value) { $this->ngayTao = $value; }
     public function setTongTien($value) { $this->tongTien = $value; }
+    public function setThanhToan($value) { $this->thanhToan = $value; }
+    public function setDiaChi($value) { $this->diaChi = $value; }
     public function setTrangThai($value) { $this->trangThai = $value; }
     public function setItems($value) { $this->items = $value; }
 
@@ -31,6 +37,8 @@ class Order extends BaseModel {
         $this->maTK = $data['maTK'] ?? null;
         $this->ngayTao = $data['ngayTao'] ?? null;
         $this->tongTien = $data['tongTien'] ?? null;
+        $this->thanhToan = $data['thanhToan'] ?? null;
+        $this->diaChi = $data['diaChi'] ?? null;
         $this->trangThai = $data['trangThai'] ?? null;
         $this->items = $data['items'] ?? [];
     }
@@ -135,6 +143,40 @@ class Order extends BaseModel {
             error_log("Error in getOrderWithDetails: " . $e->getMessage());
             return null;
         }
+    }
+
+    public function createHD($formDataHD) {
+        extract($formDataHD);
+        $sql = "INSERT INTO HoaDon (ngayTao, tongSoLuong, tongTien, maTK, trangThai, thanhToan, diaChi) 
+                VALUES (:ngayTao, :tongSoLuong, :tongTien, :maTK, :trangThai, :thanhToan, :diaChi)";
+        $stmt = $this->db->prepare($sql);
+        $success = $stmt->execute([
+            ':ngayTao' => $ngayTao,
+            ':tongSoLuong' => $tongSoLuong, 
+            ':tongTien' => $tongTien, 
+            ':maTK' => $maTK,
+            ':trangThai' => $trangThai, 
+            ':thanhToan' => $thanhToan,
+            ':diaChi' => $diaChi,        
+        ]);
+        return $success ? $this->db->lastInsertId() : false;
+    }
+
+    
+
+    public function createCTHD($formData) {
+        extract($formData);
+        $sql = "INSERT INTO ChiTietHoaDon (maHD, maGiay, size, giaBan, soLuong, thanhTien) 
+                VALUES (:maHD, :maGiay, :size, :giaBan, :soLuong, :thanhTien)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':maHD' => $maHD, 
+            ':maGiay' => $maGiay, 
+            ':size' => $size, 
+            ':giaBan' => $giaBan, 
+            ':soLuong' => $soLuong, 
+            ':thanhTien' => $thanhTien      
+        ]);
     }
 
     public function updateStatus($id, $status) {
