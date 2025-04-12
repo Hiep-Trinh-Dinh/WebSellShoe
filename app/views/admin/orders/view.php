@@ -61,6 +61,7 @@
                             <tr>
                                 <th>STT</th>
                                 <th>Tên sản phẩm</th>
+                                <th>Size</th>
                                 <th>Giá bán</th>
                                 <th>Số lượng</th>
                                 <th>Thành tiền</th>
@@ -74,6 +75,7 @@
                                 <tr>
                                     <td class="text-center"><?php echo $stt++; ?></td>
                                     <td class="product-name"><?php echo $detail['tenGiay']; ?></td>
+                                    <td class="size"><?php echo $detail['size']; ?></td>
                                     <td class="text-right"><?php echo number_format($detail['giaBan']); ?>đ</td>
                                     <td class="text-center"><?php echo $detail['soLuong']; ?></td>
                                     <td class="text-right product-total"><?php echo number_format($detail['thanhTien']); ?>đ</td>

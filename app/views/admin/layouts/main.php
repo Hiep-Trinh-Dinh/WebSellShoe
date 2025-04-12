@@ -82,7 +82,9 @@
                         echo '</div>';
                     }
                     ?>
-                    <?php require_once $content; ?>
+                    <?php 
+                        require_once $content; 
+                    ?>
                     <?php require_once "app/views/admin/toasts/index.php" ?>
                 </div>
             </main>

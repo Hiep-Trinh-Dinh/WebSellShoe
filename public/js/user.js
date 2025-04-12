@@ -41,3 +41,4 @@ window.onload = function() {
         localStorage.removeItem('toastMessage');
     }
 };
+

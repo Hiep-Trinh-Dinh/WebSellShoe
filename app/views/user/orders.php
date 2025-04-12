@@ -54,7 +54,7 @@
                                 <div class="flex gap-4">
                                     <div class="h-20 w-20 flex-shrink-0">
                                         <?php if ($item['hinhAnh']): ?>
-                                            <img src="data:image/jpeg;base64,<?php echo base64_encode($item['hinhAnh']); ?>"
+                                            <img src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($item['hinhAnh']) ?>"
                                                  alt="<?php echo htmlspecialchars($item['tenGiay']); ?>"
                                                  class="h-full w-full object-cover rounded">
                                         <?php endif; ?>

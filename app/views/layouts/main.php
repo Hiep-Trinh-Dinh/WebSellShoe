@@ -16,6 +16,7 @@
     crossorigin="anonymous"></script>
     <!-- Custom CSS -->
     <link href="<?php echo BASE_URL; ?>/public/css/globals.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>/public/css/toasts.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -30,6 +31,9 @@
         ?>
     </main>
 
+    <?php require_once "app/views/admin/toasts/index.php" ?>
     <?php require_once 'app/components/footer.php'; ?>
+
+    <script src="<?php echo BASE_URL; ?>/public/js/user.js"></script>
 </body>
 </html> 

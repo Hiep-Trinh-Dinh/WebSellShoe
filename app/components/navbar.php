@@ -20,10 +20,11 @@
         </nav>
 
         <div class="hidden md:flex items-center gap-4">
-            <a href="<?php echo BASE_URL; ?>/cart" class="relative">
+            <a href="<?php echo BASE_URL; ?>/cart" class="relative" onclick="sendCartViaAjax()">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                 </svg>
+            
             </a>
             
             <?php if (isset($_SESSION['user_id'])): ?>

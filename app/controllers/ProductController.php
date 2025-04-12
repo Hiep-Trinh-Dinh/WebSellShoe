@@ -1,5 +1,6 @@
 <?php
 class ProductController extends BaseController {
+    private $data;
     private $productModel;
     private $categoryModel;
 
@@ -42,6 +43,7 @@ class ProductController extends BaseController {
             ]);
         }
     }
+
 
     public function detail($params = []) {
         try {

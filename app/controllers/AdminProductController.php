@@ -45,12 +45,12 @@ class AdminProductController extends BaseController {
             $formData['giaBan'] = $_POST['giaBan'];
             $formData['tonKho']= $_POST['tonKho'];
             $formData['hinhAnh'] = $_POST['hinhAnh'];
-            $isTenGiayExists = $this->productModel->isTenGiayExists($formData['tenGiay']);
+            $isTenGiayExists = $this->productModel->isTenGiayExists($formData['tenGiay'], $formData['size']);
             if($isTenGiayExists)
             {
                 echo "<script>
                         localStorage.setItem('showToast', 'error');
-                        localStorage.setItem('toastMessage', 'Giày này đã có trong danh sách');
+                        localStorage.setItem('toastMessage', 'Giày có size này đã tồn tại trong danh sách');
                         window.location.href = '" . BASE_URL . "/admin/products';
                     </script>";
                 return;

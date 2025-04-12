@@ -63,7 +63,7 @@
                     <div class="overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-lg">
                         <div class="relative h-64 w-full overflow-hidden">
                             <?php if ($product['hinhAnh']): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['hinhAnh']); ?>"
+                                <img src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product['hinhAnh']) ?>"
                                      alt="<?php echo htmlspecialchars($product['tenGiay']); ?>"
                                      class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
                             <?php else: ?>
@@ -73,7 +73,10 @@
                             <?php endif; ?>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-medium"><?php echo htmlspecialchars($product['tenGiay']); ?></h3>
+                            <h3 class="font-medium">
+                                <?php echo htmlspecialchars($product['tenGiay']); ?>
+                                (size: <?php echo htmlspecialchars($product['size']); ?>)
+                            </h3>
                             <div class="mt-1 flex items-center">
                                 <?php for ($i = 0; $i < 5; $i++): ?>
                                     <svg class="h-4 w-4 <?php echo $i < 4 ? 'text-yellow-500 fill-yellow-500' : 'text-gray-200 fill-gray-200'; ?>" viewBox="0 0 24 24">
@@ -84,7 +87,10 @@
                             </div>
                             <div class="mt-3 flex items-center justify-between">
                                 <span class="font-bold"><?php echo number_format($product['giaBan'], 0, ',', '.'); ?>đ</span>
-                                <button class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-600">
+                                <button 
+                                    class="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-600"
+                                    onclick="addToCart(<?php echo $product['maGiay']; ?>)"
+                                >
                                     Thêm vào giỏ
                                 </button>
                             </div>
@@ -155,3 +161,67 @@
         </div>
     </section>
 </div> 
+
+<script>
+const BASE_URL = window.location.origin + "/Web2";
+
+function addToCart(productId) {
+    const quantity = 1;
+    
+    fetch(BASE_URL + "/cart/add", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `productId=${productId}&quantity=${quantity}`
+    })
+    .then(response => {
+        
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) 
+        {
+            localStorage.setItem('showToast', 'success');
+            localStorage.setItem('toastMessage', 'Đã thêm sản phẩm vào giỏ hàng');
+            localStorage.setItem('cartItem', JSON.stringify(data.cartItem));
+            let productTemp = JSON.parse(data.cartItem.product);
+            let cartItems = JSON.parse(localStorage.getItem('cartItems')) || []; 
+            let needToPush = true;
+            if(cartItems.length > 0)
+            {
+                cartItems.forEach((item, index) => {
+                    const product = JSON.parse(item.product);
+                    if(product.maGiay == productTemp.maGiay)
+                    {
+                        item.quantity = parseInt(item.quantity) + parseInt(data.cartItem.quantity);
+                        needToPush = false;
+                    }
+                });
+            }
+            if(needToPush)
+            {
+                cartItems.push({
+                    product: data.cartItem.product,
+                    quantity: parseInt(data.cartItem.quantity)
+                });
+            }
+
+
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            window.location.reload();
+        } 
+        else 
+        {
+            localStorage.setItem('showToast', 'error');
+            localStorage.setItem('toastMessage', data.message);
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra');
+    });
+}
+
+</script>
