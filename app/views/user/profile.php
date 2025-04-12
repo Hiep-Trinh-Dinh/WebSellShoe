@@ -104,17 +104,17 @@
                             <div class="p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="font-medium">Đơn hàng #<?php echo $order['maHD']; ?></p>
+                                        <p class="font-medium">Đơn hàng #<?php echo $order->getMaHD(); ?></p>
                                         <p class="text-sm text-gray-500">
-                                            <?php echo date('d/m/Y', strtotime($order['ngayTao'])); ?>
+                                            <?php echo date('d/m/Y', strtotime($order->getNgayTao())); ?>
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         <p class="font-medium">
-                                            <?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ
+                                            <?php echo number_format($order->getTongTien(), 0, ',', '.'); ?>đ
                                         </p>
                                         <p class="text-sm <?php 
-                                            switch($order['trangThai']) {
+                                            switch($order->getTrangThai()) {
                                                 case 0:
                                                     echo 'text-yellow-500">Chờ xử lý';
                                                     break;

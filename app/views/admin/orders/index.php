@@ -13,6 +13,8 @@
                         <th class="pb-4">Ngày tạo</th>
                         <th class="pb-4">Số lượng</th>
                         <th class="pb-4">Tổng tiền</th>
+                        <th class="pb-4">Thanh toán</th>
+                        <th class="pb-4">Địa chỉ</th>
                         <th class="pb-4">Trạng thái</th>
                         <th class="pb-4">Thao tác</th>
                     </tr>
@@ -26,6 +28,8 @@
                             <td class="py-4"><?php echo date('d/m/Y H:i', strtotime($order['ngayTao'])); ?></td>
                             <td class="py-4"><?php echo $order['tongSoLuong']; ?></td>
                             <td class="py-4"><?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ</td>
+                            <td class="py-4" ><?php echo $order['thanhToan'] == 1 ? "Tiền mặt" : "Chuyển khoản" ?></td>
+                            <td class="py-4"><?php echo $order['diaChi'] ?></td>
                             <td class="py-4">
                                 <select onchange="updateOrderStatus(<?php echo $order['maHD']; ?>, this.value)"
                                         class="rounded-full px-3 py-1 text-sm 

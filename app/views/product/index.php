@@ -106,39 +106,41 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($products as $product): ?>
-                <div class="group relative">
-                    <a href="<?php echo BASE_URL . '/products/detail/' . $product->getMaGiay(); ?>" 
-                       class="block overflow-hidden rounded-lg bg-white shadow-md hover:shadow-lg">
-                        <div class="aspect-square overflow-hidden">
-                            <?php if ($product->getHinhAnh()): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product->getHinhAnh()); ?>"
-                                     alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
-                                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
-                            <?php else: ?>
-                                <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
-                                     alt="No Image"
-                                     class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
-                            <?php endif; ?>
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-lg font-medium text-gray-900">
-                                <?php echo htmlspecialchars($product->getTenGiay()); ?>
-                            </h3>
-                            <p class="mt-1 text-gray-500">
-                                <?php echo htmlspecialchars($product->getTenLoaiGiay()); ?>
-                            </p>
-                            <div class="mt-3 flex items-center justify-between">
-                                <p class="text-lg font-medium text-yellow-500">
-                                    <?php echo number_format($product->getGiaBan(), 0, ',', '.'); ?>đ
-                                </p>
-                                <button onclick="event.stopPropagation(); addToCart(<?php echo $product->getMaGiay(); ?>)" 
-                                        class="rounded-md bg-yellow-500 px-3 py-2 text-sm text-white hover:bg-yellow-600">
-                                    Thêm vào giỏ
-                                </button>
+                    <div class="group relative">
+                        <a href="<?php echo BASE_URL . '/products/detail/' . $product->getMaGiay(); ?>" 
+                        class="block overflow-hidden rounded-lg bg-white shadow-md hover:shadow-lg">
+                            <div class="aspect-square overflow-hidden">
+                                <?php if ($product->getHinhAnh()): ?>
+                                    <img 
+                                        src="<?php echo BASE_URL ?>/public/img/<?php echo base64_decode($product->getHinhAnh()) ?>"
+                                        alt="<?php echo htmlspecialchars($product->getTenGiay()); ?>"
+                                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                <?php else: ?>
+                                    <img src="<?php echo BASE_URL; ?>/public/images/no-image.jpg"
+                                        alt="No Image"
+                                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                <?php endif; ?>
                             </div>
-                        </div>
-                    </a>
-                </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-medium text-gray-900">
+                                    <?php echo htmlspecialchars($product->getTenGiay()); ?>
+                                    (size: <?php echo htmlspecialchars($product->getSize()); ?>)
+                                </h3>
+                                <p class="mt-1 text-gray-500">
+                                    <?php echo htmlspecialchars($product->getTenLoaiGiay()); ?>
+                                </p>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <p class="text-lg font-medium text-yellow-500">
+                                        <?php echo number_format($product->getGiaBan(), 0, ',', '.'); ?>đ
+                                    </p>
+                                    <button onclick="event.stopPropagation(); addToCart(<?php echo $product->getMaGiay(); ?>)" 
+                                            class="rounded-md bg-yellow-500 px-3 py-2 text-sm text-white hover:bg-yellow-600">
+                                        Thêm vào giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 <?php endforeach; ?>
             </div>
 
@@ -166,25 +168,59 @@
 </div>
 
 <script>
+const BASE_URL = window.location.origin + "/Web2";
+
 function addToCart(productId, event) {
-    event.preventDefault();
+    const quantity = 1;
     
-    fetch(`${BASE_URL}/cart/add`, {
+    fetch(BASE_URL + "/cart/add", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `productId=${productId}&quantity=1`
+        body: `productId=${productId}&quantity=${quantity}`
     })
-    .then(response => response.json())
+    .then(response => {
+        
+        return response.json();
+    })
     .then(data => {
-        if (data.success) {
-            alert('Đã thêm sản phẩm vào giỏ hàng');
-            if (data.cartCount) {
-                document.getElementById('cartCount').textContent = data.cartCount;
+        if (data.success) 
+        {
+            localStorage.setItem('showToast', 'success');
+            localStorage.setItem('toastMessage', 'Đã thêm sản phẩm vào giỏ hàng');
+            localStorage.setItem('cartItem', JSON.stringify(data.cartItem));
+            let productTemp = JSON.parse(data.cartItem.product);
+            let cartItems = JSON.parse(localStorage.getItem('cartItems')) || []; 
+            let needToPush = true;
+            if(cartItems.length > 0)
+            {
+                cartItems.forEach((item, index) => {
+                    const product = JSON.parse(item.product);
+                    if(product.maGiay == productTemp.maGiay)
+                    {
+                        item.quantity = parseInt(item.quantity) + parseInt(data.cartItem.quantity);
+                        needToPush = false;
+                    }
+                });
             }
-        } else {
-            alert(data.message || 'Có lỗi xảy ra');
+            if(needToPush)
+            {
+                cartItems.push({
+                    product: data.cartItem.product,
+                    quantity: parseInt(data.cartItem.quantity)
+                });
+            }
+
+
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            window.location.reload();
+        } 
+        else 
+        {
+            localStorage.setItem('showToast', 'error');
+            localStorage.setItem('toastMessage', data.message);
+            window.location.reload();
         }
     })
     .catch(error => {
