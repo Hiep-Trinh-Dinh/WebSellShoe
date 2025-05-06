@@ -394,6 +394,14 @@ class Product extends BaseModel {
         return $count > 0;
     }
 
+    public function isMaGiayExistsInCTHD($maGiay) {
+        $sql = "SELECT COUNT(*) FROM ChiTietHoaDon WHERE maGiay = :maGiay";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':maGiay' => $maGiay]);
+        $count = $stmt->fetchColumn();
+        return $count > 0;
+    }
+
     public function update($id, $formData) {
         extract($formData);
         $hinhAnh = base64_encode($hinhAnh);
@@ -403,8 +411,7 @@ class Product extends BaseModel {
                     size = :size, 
                     giaBan = :giaBan, 
                     tonKho = :tonKho,
-                    hinhAnh = :hinhAnh,
-                    trangThai = :trangThai";
+                    hinhAnh = :hinhAnh";
         
         $params = [
             ':tenGiay' => $tenGiay,
@@ -413,7 +420,6 @@ class Product extends BaseModel {
             ':giaBan' => $giaBan,
             ':tonKho' => $tonKho,
             ':hinhAnh' => $hinhAnh,
-            ':trangThai' => $trangThai,
             ':id' => $id
         ];
 
@@ -425,10 +431,9 @@ class Product extends BaseModel {
     }
 
     public function delete($id) {
-        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
+        $sql = "DELETE FROM {$this->table} WHERE maGiay = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':trangThai' => 0,
             ':id' => $id
         ]);
     }
@@ -438,6 +443,15 @@ class Product extends BaseModel {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':trangThai' => 1,
+            ':id' => $id
+        ]);
+    }
+
+    public function lock($id) {
+        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':trangThai' => 0,
             ':id' => $id
         ]);
     }

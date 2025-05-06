@@ -44,6 +44,7 @@ class Routes {
         'admin/products/edit' => ['controller' => 'AdminProductController', 'action' => 'edit'],
         'admin/products/delete' => ['controller' => 'AdminProductController', 'action' => 'delete'],
         'admin/products/unlock' => ['controller' => 'AdminProductController', 'action' => 'unlock'],
+        'admin/products/lock' => ['controller' => 'AdminProductController', 'action' => 'lock'],
         
         'admin/categories' => ['controller' => 'AdminCategoryController', 'action' => 'index'],
         'admin/categories/add' => ['controller' => 'AdminCategoryController', 'action' => 'add'],

@@ -221,14 +221,14 @@
                                                                 Vui lòng không để trống trường này
                                                             </div>
                                                         </div>
-                                                        <div class="mb-3">
+                                                        <!-- <div class="mb-3">
                                                             <label for="trangThai" class="col-form-label">Trạng thái:</label>
                                                             <select class="form-select" id="trangThai<?php echo $product['maGiay'] ?>" name="trangThai" aria-label="Default select example" required>
                                                                 <option value="1">Hoạt động</option>
                                                                 <option value="0">Khóa</option>
                                                             </select>
     
-                                                        </div>
+                                                        </div> -->
                                                         <div class="mt-3" style="float: right;">
                                                             <button type="button" class="btn btn-secondary" id="edit-close-btn<?php echo $product["maGiay"] ?>" data-bs-dismiss="modal">Close</button>
                                                             <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
@@ -241,7 +241,7 @@
                                 <?php endif; ?>
                                 <!--- End Modal Edit Product -->
 
-                                <!-- Begin Modal Unlock Product -->
+                                <!-- Begin Modal Lock/Unlock Product -->
                                 <?php if($product['trangThai'] != 1): ?>
                                     <button 
                                         type="button"
@@ -273,11 +273,42 @@
                                             </div>
                                         </div>
                                     </div>
+                                <?php else: ?>
+                                    <button 
+                                        type="button"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalLockProduct<?php echo $product['maGiay'] ?>" 
+                                        class="text-yellow-500 hover:text-yellow-700 mr-2"
+                                    >
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                    <div class="modal fade" id="modalLockProduct<?php echo $product['maGiay'] ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-md">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Lock giày</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="products/lock" method="POST" class="needs-validation" novalidate>
+                                                        <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
+                                                        <div class="mb-3">
+                                                            <h3>Bạn có chắc muốn khóa  giày <?php echo $product['tenGiay'] ?> ?</h3>
+                                                        </div>
+                                                        
+                                                        <div class="mt-3" style="float: right;">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
-                                <!-- Begin Modal Unlock Product -->
+                                <!-- Begin Modal Lock/Unlock Product -->
 
                                 <!-- Begin Modal Delete Product -->
-                                <?php if($product['trangThai'] != 0): ?>
+                                <!-- <php if($product['trangThai'] != 0): > -->
                                     <button 
                                         type="button"
                                         data-bs-toggle="modal" 
@@ -308,7 +339,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                <?php endif; ?>
+                                <!-- <php endif; > -->
                                 <!-- Begin Modal Delete Product -->
                             </td>
                         </tr>

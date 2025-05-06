@@ -89,7 +89,6 @@ class AdminProductController extends BaseController {
             $formData['giaBan'] = $_POST['giaBan'];
             $formData['tonKho']= $_POST['tonKho'];
             $formData['hinhAnh'] = $_POST['hinhAnhMoi'] ? $_POST['hinhAnhMoi'] : $_POST['hinhAnhCu'];
-            $formData['trangThai']= $_POST['trangThai'];
 
             $isEditProduct = $this->productModel->update($formData['maGiay'], $formData);
             if($isEditProduct)
@@ -119,17 +118,26 @@ class AdminProductController extends BaseController {
         {
             $formData['maGiay'] = $_POST['maGiay'];
             
-            $isDeleteProduct = $this->productModel->delete($formData['maGiay']);
-            if($isDeleteProduct)
+
+            $isMaGiayExistsInCTHD = $this->productModel->isMaGiayExistsInCTHD($formData['maGiay']);
+            if(!$isMaGiayExistsInCTHD)
             {
+                $this->productModel->delete($formData['maGiay']);
                 echo "<script>
                         localStorage.setItem('showToast', 'success');
-                        localStorage.setItem('toastMessage', 'Khóa thành công');
+                        localStorage.setItem('toastMessage', 'Xóa thành công');
                         window.location.href = '" . BASE_URL . "/admin/products';
                     </script>";
                 exit();
             }
-
+            else
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Mã giày: ". $formData['maGiay'] ." đang được bán hoặc đã bán cho khách hàng');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+            }
         }
     }
 
@@ -149,7 +157,25 @@ class AdminProductController extends BaseController {
                     </script>";
                 exit();
             }
+        }
+    }
 
+    public function lock()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $formData['maGiay'] = $_POST['maGiay'];
+            
+            $isLockProduct = $this->productModel->lock($formData['maGiay']);
+            if($isLockProduct)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'success');
+                        localStorage.setItem('toastMessage', 'Khóa thành công');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
         }
     }
 
