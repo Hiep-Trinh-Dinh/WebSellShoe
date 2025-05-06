@@ -21,7 +21,7 @@
 
         <!-- Thống kê tháng -->
         <div class="bg-gray-50 p-4 rounded-lg mb-6">
-            <h2 class="text-lg font-semibold mb-3">Thống kê tháng <?php echo $month; ?>/<?php echo $year; ?></h2>
+            <h2 class="text-lg font-semibold mb-3">Thống kê từ <?php echo date('d/m/Y', strtotime($startDate)); ?> đến <?php echo date('d/m/Y', strtotime($endDate)); ?></h2>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p><span class="font-medium">Tổng số đơn hàng:</span> <?php echo $totalOrders; ?></p>
@@ -35,7 +35,7 @@
         <!-- Danh sách đơn hàng -->
         <?php if (empty($orders)): ?>
             <div class="text-center py-4">
-                <p class="text-gray-500">Không có đơn hàng nào trong tháng này</p>
+                <p class="text-gray-500">Không có đơn hàng nào trong khoảng thời gian này</p>
             </div>
         <?php else: ?>
             <?php foreach ($orders as $order): ?>

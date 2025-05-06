@@ -269,5 +269,45 @@ class User extends BaseModel {
         
         return $result;
     }
+
+    public function getAllWithPagination($page = 1, $limit = 6) {
+        try {
+            // Tính offset
+            $offset = ($page - 1) * $limit;
+            
+            // Lấy tổng số người dùng
+            $totalSql = "SELECT COUNT(*) as total FROM TaiKhoan";
+            $totalStmt = $this->db->prepare($totalSql);
+            $totalStmt->execute();
+            $total = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Lấy danh sách người dùng theo phân trang
+            $sql = "SELECT tk.*, q.tenQuyen 
+                    FROM TaiKhoan tk 
+                    LEFT JOIN Quyen q ON tk.maQuyen = q.maQuyen 
+                    ORDER BY tk.maTK ASC 
+                    LIMIT :limit OFFSET :offset";
+                    
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return [
+                'users' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+                'total' => $total,
+                'totalPages' => ceil($total / $limit),
+                'currentPage' => $page
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in getAllWithPagination: " . $e->getMessage());
+            return [
+                'users' => [],
+                'total' => 0,
+                'totalPages' => 1,
+                'currentPage' => 1
+            ];
+        }
+    }
 }
 ?> 

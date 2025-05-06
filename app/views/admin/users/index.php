@@ -355,6 +355,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tbody>
             </table>
         </div>
+
+        <!-- Phân trang -->
+        <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
+        <div class="flex justify-center mt-6">
+            <nav class="flex items-center space-x-2">
+                <?php if ($pagination['currentPage'] > 1): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/users?page=<?php echo $pagination['currentPage'] - 1; ?>" 
+                       class="px-3 py-1 rounded border hover:bg-gray-100">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <?php endif; ?>
+                
+                <?php
+                // Hiển thị số trang
+                $startPage = max(1, $pagination['currentPage'] - 2);
+                $endPage = min($pagination['totalPages'], $startPage + 4);
+                
+                if ($endPage - $startPage < 4 && $startPage > 1) {
+                    $startPage = max(1, $endPage - 4);
+                }
+                
+                for ($i = $startPage; $i <= $endPage; $i++):
+                ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/users?page=<?php echo $i; ?>" 
+                       class="px-3 py-1 rounded border <?php echo $i == $pagination['currentPage'] ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/users?page=<?php echo $pagination['currentPage'] + 1; ?>" 
+                       class="px-3 py-1 rounded border hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                <?php endif; ?>
+            </nav>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

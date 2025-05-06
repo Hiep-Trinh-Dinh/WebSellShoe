@@ -12,12 +12,27 @@ class AdminOrderController extends BaseController {
     }
 
     public function index() {
-        $orders = $this->orderModel->getAll();
+        // Lấy tham số page từ URL, mặc định là trang 1
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        // Lấy danh sách đơn hàng có phân trang
+        $orderData = $this->orderModel->getOrdersWithPagination($page, 6);
+        
         $this->view('admin/layouts/main', [
             'content' => 'admin/orders/index.php',
             'title' => 'Quản lý đơn hàng',
             'currentPage' => 'orders',
-            'orders' => $orders
+            'orders' => $orderData['orders'],
+            'pagination' => [
+                'currentPage' => $orderData['currentPage'],
+                'totalPages' => $orderData['totalPages'],
+                'total' => $orderData['total']
+            ]
         ]);
     }
 

@@ -130,4 +130,39 @@ class Supplier extends BaseModel {
             throw new Exception('Có lỗi xảy ra khi xóa nhà cung cấp');
         }
     }
+
+    public function getAllWithPagination($page = 1, $limit = 6) {
+        try {
+            // Tính offset
+            $offset = ($page - 1) * $limit;
+            
+            // Lấy tổng số nhà cung cấp
+            $totalSql = "SELECT COUNT(*) as total FROM {$this->table}";
+            $totalStmt = $this->db->prepare($totalSql);
+            $totalStmt->execute();
+            $total = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Lấy danh sách nhà cung cấp theo phân trang
+            $sql = "SELECT * FROM {$this->table} ORDER BY maNCC ASC LIMIT :limit OFFSET :offset";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return [
+                'suppliers' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+                'total' => $total,
+                'totalPages' => ceil($total / $limit),
+                'currentPage' => $page
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in getAllWithPagination: " . $e->getMessage());
+            return [
+                'suppliers' => [],
+                'total' => 0,
+                'totalPages' => 1,
+                'currentPage' => 1
+            ];
+        }
+    }
 } 

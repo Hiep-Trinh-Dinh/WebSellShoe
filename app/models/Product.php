@@ -424,13 +424,80 @@ class Product extends BaseModel {
         return $stmt->execute($params);
     }
 
-    public function delete($id) {
-        $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
+    /**
+     * Kiểm tra xem sản phẩm có nằm trong đơn hàng nào không
+     * @param int $productId Mã sản phẩm cần kiểm tra
+     * @return bool True nếu sản phẩm đã có trong đơn hàng, False nếu chưa
+     */
+    public function isProductInOrder($productId) {
+        try {
+            $sql = "SELECT COUNT(*) as count FROM ChiTietHoaDon WHERE maGiay = :productId";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':productId', $productId, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['count'] > 0);
+        } catch (PDOException $e) {
+            error_log("Error in isProductInOrder: " . $e->getMessage());
+            // Trong trường hợp lỗi, để an toàn, chúng ta giả định sản phẩm đã có trong đơn hàng
+            return true;
+        }
+    }
+
+    /**
+     * Xóa sản phẩm khỏi cơ sở dữ liệu
+     * @param int $id Mã sản phẩm cần xóa
+     * @return bool Kết quả thực hiện
+     */
+    public function permanentDelete($id) {
+        $sql = "DELETE FROM {$this->table} WHERE maGiay = :id";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            ':trangThai' => 0,
-            ':id' => $id
-        ]);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Xóa hoặc khóa sản phẩm tùy vào việc sản phẩm có nằm trong đơn hàng hay không
+     * @param int $id Mã sản phẩm
+     * @return array Kết quả thực hiện và thông báo
+     */
+    public function delete($id) {
+        try {
+            // Kiểm tra xem sản phẩm có trong đơn hàng nào không
+            $isInOrder = $this->isProductInOrder($id);
+            
+            if ($isInOrder) {
+                // Nếu sản phẩm đã có trong đơn hàng, chỉ khóa sản phẩm
+                $sql = "UPDATE {$this->table} SET trangThai = :trangThai WHERE maGiay = :id";
+                $stmt = $this->db->prepare($sql);
+                $result = $stmt->execute([
+                    ':trangThai' => 0,
+                    ':id' => $id
+                ]);
+                
+                return [
+                    'success' => $result,
+                    'action' => 'lock',
+                    'message' => 'Sản phẩm đã được khóa'
+                ];
+            } else {
+                // Nếu sản phẩm chưa có trong đơn hàng nào, xóa hoàn toàn
+                $result = $this->permanentDelete($id);
+                
+                return [
+                    'success' => $result,
+                    'action' => 'delete',
+                    'message' => 'Sản phẩm đã được xóa hoàn toàn'
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error in delete: " . $e->getMessage());
+            return [
+                'success' => false,
+                'action' => 'error',
+                'message' => 'Đã xảy ra lỗi: ' . $e->getMessage()
+            ];
+        }
     }
 
     public function unlock($id) {
@@ -458,6 +525,49 @@ class Product extends BaseModel {
             ':quantity' => $quantity,
             ':id' => $id
         ]);
+    }
+
+    public function getAllWithPagination($page = 1, $perPage = 6) {
+        try {
+            // Đếm tổng số sản phẩm
+            $countSql = "SELECT COUNT(*) as total FROM Giay";
+            $countStmt = $this->db->prepare($countSql);
+            $countStmt->execute();
+            $totalProducts = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Tính offset cho phân trang
+            $offset = ($page - 1) * $perPage;
+
+            // Lấy danh sách sản phẩm theo phân trang
+            $sql = "SELECT g.*, lg.tenLoaiGiay 
+                    FROM Giay g 
+                    LEFT JOIN LoaiGiay lg ON g.maLoaiGiay = lg.maLoaiGiay 
+                    ORDER BY g.maGiay ASC
+                    LIMIT :limit OFFSET :offset";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return [
+                'products' => $products,
+                'total' => $totalProducts,
+                'totalPages' => ceil($totalProducts / $perPage),
+                'currentPage' => $page
+            ];
+            
+        } catch (PDOException $e) {
+            error_log("Error in getAllWithPagination: " . $e->getMessage());
+            return [
+                'products' => [],
+                'total' => 0,
+                'totalPages' => 0,
+                'currentPage' => 1
+            ];
+        }
     }
 }
 ?> 

@@ -290,18 +290,22 @@
                                         <div class="modal-dialog modal-md">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title">Delete giày</h5>
+                                                    <h5 class="modal-title">Xóa/Khóa sản phẩm</h5>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form action="products/delete" method="POST" class="needs-validation" novalidate>
                                                         <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
                                                         <div class="mb-3">
-                                                            <h3>Bạn có chắc muốn khóa  giày <?php echo $product['tenGiay'] ?> ?</h3>
+                                                            <h3>Bạn có chắc muốn xóa/khóa giày <?php echo $product['tenGiay'] ?> ?</h3>
+                                                            <p class="text-sm text-gray-600 mt-2">
+                                                                Lưu ý: Nếu sản phẩm đã nằm trong hóa đơn, sản phẩm sẽ bị khóa.
+                                                                Nếu sản phẩm chưa nằm trong hóa đơn nào, sản phẩm sẽ bị xóa hoàn toàn.
+                                                            </p>
                                                         </div>
                                                         
                                                         <div class="mt-3" style="float: right;">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                            <button type="submit" class="btn btn-primary" style="margin-left: 5px;">Send message</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                            <button type="submit" class="btn btn-danger" style="margin-left: 5px;">Xác nhận</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -315,12 +319,50 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="py-4 text-center text-gray-500">Không có giày nào</td>
+                            <td colspan="8" class="py-4 text-center text-gray-500">Không có dữ liệu</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        
+        <!-- Phân trang -->
+        <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
+        <div class="flex justify-center mt-6">
+            <nav class="flex items-center space-x-2">
+                <?php if ($pagination['currentPage'] > 1): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $pagination['currentPage'] - 1; ?>" 
+                       class="px-3 py-1 rounded border hover:bg-gray-100">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <?php endif; ?>
+                
+                <?php
+                // Hiển thị số trang
+                $startPage = max(1, $pagination['currentPage'] - 2);
+                $endPage = min($pagination['totalPages'], $startPage + 4);
+                
+                if ($endPage - $startPage < 4 && $startPage > 1) {
+                    $startPage = max(1, $endPage - 4);
+                }
+                
+                for ($i = $startPage; $i <= $endPage; $i++):
+                ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $i; ?>" 
+                       class="px-3 py-1 rounded border <?php echo $i == $pagination['currentPage'] ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $pagination['currentPage'] + 1; ?>" 
+                       class="px-3 py-1 rounded border hover:bg-gray-100">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                <?php endif; ?>
+            </nav>
+        </div>
+        <?php endif; ?>
     </div>
 </div> 
 

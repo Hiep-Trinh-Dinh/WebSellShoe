@@ -267,20 +267,20 @@ class Order extends BaseModel {
 
                 // Xử lý chi tiết đơn hàng
                 $items = [];
-                if ($row['maGiays']) {
+                if (!empty($row['maGiays'])) {
                     $maGiays = explode(',', $row['maGiays']);
-                    $soLuongs = explode(',', $row['soLuongs']);
-                    $giaBans = explode(',', $row['giaBans']);
-                    $tenGiays = explode(',', $row['tenGiays']);
-                    $hinhAnhs = explode(',', $row['hinhAnhs']);
+                    $soLuongs = explode(',', $row['soLuongs'] ?? '');
+                    $giaBans = explode(',', $row['giaBans'] ?? '');
+                    $tenGiays = explode(',', $row['tenGiays'] ?? '');
+                    $hinhAnhs = explode(',', $row['hinhAnhs'] ?? '');
 
                     for ($i = 0; $i < count($maGiays); $i++) {
                         $items[] = [
-                            'maGiay' => $maGiays[$i],
-                            'soLuong' => $soLuongs[$i],
-                            'giaBan' => $giaBans[$i],
-                            'tenGiay' => $tenGiays[$i],
-                            'hinhAnh' => $hinhAnhs[$i]
+                            'maGiay' => $maGiays[$i] ?? '',
+                            'soLuong' => isset($soLuongs[$i]) ? $soLuongs[$i] : '',
+                            'giaBan' => isset($giaBans[$i]) ? $giaBans[$i] : '',
+                            'tenGiay' => isset($tenGiays[$i]) ? $tenGiays[$i] : '',
+                            'hinhAnh' => isset($hinhAnhs[$i]) ? $hinhAnhs[$i] : ''
                         ];
                     }
                 }
@@ -375,7 +375,7 @@ class Order extends BaseModel {
             $sql = "SELECT hd.*, tk.tenTK 
                     FROM HoaDon hd
                     LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
-                    ORDER BY hd.ngayTao DESC 
+                    ORDER BY hd.maHD ASC 
                     LIMIT :limit OFFSET :offset";
                     
             $stmt = $this->db->prepare($sql);
@@ -747,6 +747,90 @@ class Order extends BaseModel {
         } catch (PDOException $e) {
             error_log("Error in getMonthlyStatistics: " . $e->getMessage());
             throw new Exception("Lỗi khi lấy thống kê");
+        }
+    }
+
+    public function getTopCustomersByDateRange($startDate, $endDate) {
+        try {
+            $sql = "SELECT 
+                        tk.maTK,
+                        tk.tenTK,
+                        COUNT(DISTINCT hd.maHD) as soLuongDon,
+                        COALESCE(SUM(hd.tongTien), 0) as tongChiTieu
+                    FROM TaiKhoan tk
+                    LEFT JOIN HoaDon hd ON tk.maTK = hd.maTK 
+                        AND DATE(hd.ngayTao) BETWEEN :startDate AND :endDate
+                        AND hd.trangThai != 4 /* Không tính đơn đã hủy */
+                    WHERE tk.maQuyen = 2 /* Chỉ lấy tài khoản khách hàng */
+                    GROUP BY tk.maTK, tk.tenTK
+                    HAVING tongChiTieu > 0
+                    ORDER BY tongChiTieu DESC
+                    LIMIT 5"; /* Giới hạn 5 người */
+                    
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+            $stmt->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("Error in getTopCustomersByDateRange: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getCustomerOrdersByDateRange($userId, $startDate, $endDate) {
+        try {
+            // Lấy đơn hàng của khách hàng theo khoảng thời gian
+            $sql = "SELECT 
+                        hd.maHD,
+                        hd.ngayTao,
+                        hd.tongTien,
+                        hd.trangThai,
+                        hd.diaChi,
+                        COUNT(cthd.maGiay) as soMatHang,
+                        GROUP_CONCAT(g.tenGiay SEPARATOR ', ') as danhSachSanPham
+                    FROM HoaDon hd
+                    LEFT JOIN ChiTietHoaDon cthd ON hd.maHD = cthd.maHD
+                    LEFT JOIN Giay g ON cthd.maGiay = g.maGiay
+                    WHERE hd.maTK = :userId 
+                        AND DATE(hd.ngayTao) BETWEEN :startDate AND :endDate
+                        AND hd.trangThai != 4 /* Không tính đơn đã hủy */
+                    GROUP BY hd.maHD, hd.ngayTao, hd.tongTien, hd.trangThai, hd.diaChi
+                    ORDER BY hd.ngayTao DESC";
+                        
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+            $stmt->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+            $stmt->execute();
+            
+            $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Nếu không có đơn hàng, trả về mảng rỗng
+            if (empty($orders)) {
+                return [];
+            }
+
+            // Lấy chi tiết từng đơn hàng
+            foreach ($orders as &$order) {
+                $sql = "SELECT cthd.*, g.tenGiay, g.hinhAnh
+                        FROM ChiTietHoaDon cthd
+                        JOIN Giay g ON cthd.maGiay = g.maGiay
+                        WHERE cthd.maHD = :orderId";
+
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':orderId', $order['maHD'], PDO::PARAM_INT);
+                $stmt->execute();
+                $order['products'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            
+            return $orders;
+            
+        } catch (PDOException $e) {
+            error_log("Error in getCustomerOrdersByDateRange: " . $e->getMessage());
+            return [];
         }
     }
 }

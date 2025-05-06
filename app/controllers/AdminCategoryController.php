@@ -14,16 +14,33 @@ class AdminCategoryController extends BaseController {
     }
 
     public function index() {
+        // Lấy tham số page từ URL, mặc định là trang 1
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        $this->generator($page);
+        
         $this->view('admin/layouts/main', $this->data);
     }
 
-    public function generator()
+    public function generator($page = 1)
     {
-        $categories = $this->categoryModel->getAll();
+        // Lấy danh sách loại giày theo phân trang
+        $categoryData = $this->categoryModel->getAllWithPagination($page, 6);
+        
         $this->data['content'] = 'admin/categories/index.php';
         $this->data['title'] = 'Quản lý loại giày';
         $this->data['currentPage'] = 'categories';
-        $this->data['categories'] = $categories;
+        $this->data['categories'] = $categoryData['categories'];
+        $this->data['pagination'] = [
+            'currentPage' => $categoryData['currentPage'],
+            'totalPages' => $categoryData['totalPages'],
+            'total' => $categoryData['total']
+        ];
     }
 
     // Thêm các methods add, edit và delete

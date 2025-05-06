@@ -10,12 +10,27 @@ class AdminSupplierController extends \Admin\AdminController {
     }
 
     public function index() {
-        $suppliers = $this->supplierModel->getAll();
+        // Lấy tham số page từ URL, mặc định là trang 1
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        // Lấy danh sách nhà cung cấp có phân trang
+        $supplierData = $this->supplierModel->getAllWithPagination($page, 6);
+        
         $this->view('admin/layouts/main', [
             'content' => 'admin/suppliers/index.php',
             'title' => 'Quản lý nhà cung cấp',
             'currentPage' => 'suppliers',
-            'suppliers' => $suppliers,
+            'suppliers' => $supplierData['suppliers'],
+            'pagination' => [
+                'currentPage' => $supplierData['currentPage'],
+                'totalPages' => $supplierData['totalPages'],
+                'total' => $supplierData['total']
+            ],
             'BASE_URL' => BASE_URL
         ]);
     }

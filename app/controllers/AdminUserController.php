@@ -12,15 +12,29 @@ class AdminUserController extends BaseController {
     }
 
     public function index() {
-        $users = $this->userModel->getAll();
+        // Lấy tham số page từ URL, mặc định là trang 1
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        // Lấy danh sách người dùng có phân trang
+        $userData = $this->userModel->getAllWithPagination($page, 6);
         $roles = $this->userModel->getAllRoles();
         
         $this->view('admin/layouts/main', [
             'content' => 'admin/users/index.php',
             'title' => 'Quản lý người dùng',
             'currentPage' => 'users',
-            'users' => $users,
-            'roles' => $roles
+            'users' => $userData['users'],
+            'roles' => $roles,
+            'pagination' => [
+                'currentPage' => $userData['currentPage'],
+                'totalPages' => $userData['totalPages'],
+                'total' => $userData['total']
+            ]
         ]);
     }
 

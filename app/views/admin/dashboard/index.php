@@ -109,30 +109,15 @@
 <div class="bg-white rounded-lg shadow">
     <div class="p-6 border-b">
         <div class="flex justify-between items-center">
-            <h2 class="text-lg font-semibold">Thống kê khách hàng trong tháng</h2>
+            <h2 class="text-lg font-semibold">Thống kê khách hàng theo khoảng thời gian</h2>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2">
-                    <label for="monthSelect" class="text-gray-600">Tháng:</label>
-                    <select id="monthSelect" class="border rounded px-3 py-1">
-                        <?php
-                        for ($i = 1; $i <= 12; $i++) {
-                            $selected = $i == $stats['currentMonth'] ? 'selected' : '';
-                            echo "<option value='$i' $selected>Tháng $i</option>";
-                        }
-                        ?>
-                    </select>
+                    <label for="startDateSelect" class="text-gray-600">Từ ngày:</label>
+                    <input type="date" id="startDateSelect" class="border rounded px-3 py-1" value="<?php echo date('Y-m-d', strtotime('-7 days')); ?>">
                 </div>
                 <div class="flex items-center gap-2">
-                    <label for="yearSelect" class="text-gray-600">Năm:</label>
-                    <select id="yearSelect" class="border rounded px-3 py-1">
-                        <?php
-                        $currentYear = date('Y');
-                        for ($i = $currentYear + 1; $i >= $currentYear - 2; $i--) {
-                            $selected = $i == $stats['currentYear'] ? 'selected' : '';
-                            echo "<option value='$i' $selected>Năm $i</option>";
-                        }
-                        ?>
-                    </select>
+                    <label for="endDateSelect" class="text-gray-600">Đến ngày:</label>
+                    <input type="date" id="endDateSelect" class="border rounded px-3 py-1" value="<?php echo date('Y-m-d'); ?>">
                 </div>
                 <button onclick="searchCustomers()" 
                         class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded flex items-center gap-2">
@@ -146,7 +131,7 @@
         <table class="w-full" id="customersTable">
             <thead>
                 <tr class="text-left">
-                    <th class="pb-4 text-center w-[10%]">STT</th>
+                    <th class="pb-4 text-center w-[10%]">TOP</th>
                     <th class="pb-4 w-[30%]">Khách hàng</th>
                     <th class="pb-4 text-center w-[20%]">Số đơn hàng</th>
                     <th class="pb-4 text-center w-[25%]">Tổng chi tiêu</th>
@@ -166,11 +151,7 @@
                             </div>
                         </td>
                         <td class="py-4 text-center">
-                            <?php
-                            $month = $stats['currentMonth'];
-                            $year = $stats['currentYear'];
-                            ?>
-                            <a href="<?php echo BASE_URL; ?>/admin/dashboard/customer-orders/<?php echo $customer['maTK']; ?>?month=<?php echo $month; ?>&year=<?php echo $year; ?>" 
+                            <a href="<?php echo BASE_URL; ?>/admin/dashboard/customer-orders/<?php echo $customer['maTK']; ?>?startDate=<?php echo date('Y-m-d', strtotime('-7 days')); ?>&endDate=<?php echo date('Y-m-d'); ?>" 
                                class="text-blue-500 hover:text-blue-700">
                                 Xem chi tiết
                             </a>
@@ -207,10 +188,15 @@
 const BASE_URL = '<?php echo BASE_URL; ?>';
 
 function searchCustomers() {
-    const month = document.getElementById('monthSelect').value;
-    const year = document.getElementById('yearSelect').value;
+    const startDate = document.getElementById('startDateSelect').value;
+    const endDate = document.getElementById('endDateSelect').value;
     
-    fetch(`${BASE_URL}/admin/dashboard/top-customers?month=${month}&year=${year}`)
+    if (!startDate || !endDate) {
+        alert('Vui lòng chọn cả ngày bắt đầu và kết thúc');
+        return;
+    }
+    
+    fetch(`${BASE_URL}/admin/dashboard/top-customers?startDate=${startDate}&endDate=${endDate}`)
         .then(response => response.json())
         .then(data => {
             const tableBody = document.getElementById('customersTableBody');
@@ -218,7 +204,7 @@ function searchCustomers() {
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="py-4 text-center text-gray-500">
-                            Không có dữ liệu cho tháng ${month}/${year}
+                            Không có dữ liệu trong khoảng thời gian từ ${startDate} đến ${endDate}
                         </td>
                     </tr>
                 `;
@@ -238,7 +224,7 @@ function searchCustomers() {
                             </div>
                         </td>
                         <td class="py-4 text-center">
-                            <a href="${BASE_URL}/admin/dashboard/customer-orders/${customer.maTK}?month=${month}&year=${year}" 
+                            <a href="${BASE_URL}/admin/dashboard/customer-orders/${customer.maTK}?startDate=${startDate}&endDate=${endDate}" 
                                class="text-blue-500 hover:text-blue-700">
                                 Xem chi tiết
                             </a>
@@ -260,9 +246,9 @@ function searchCustomers() {
         });
 }
 
-// Thêm event listener cho thay đổi tháng/năm
-document.getElementById('monthSelect').addEventListener('change', searchCustomers);
-document.getElementById('yearSelect').addEventListener('change', searchCustomers);
+// Thêm event listener cho thay đổi ngày
+document.getElementById('startDateSelect').addEventListener('change', searchCustomers);
+document.getElementById('endDateSelect').addEventListener('change', searchCustomers);
 
 // Load dữ liệu khi trang được tải
 document.addEventListener('DOMContentLoaded', searchCustomers);

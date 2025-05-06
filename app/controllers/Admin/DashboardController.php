@@ -49,15 +49,15 @@ class DashboardController extends \BaseController {
 
     public function getTopCustomers() {
         try {
-            if (!isset($_GET['month']) || !isset($_GET['year'])) {
+            if (!isset($_GET['startDate']) || !isset($_GET['endDate'])) {
                 return json_encode([]);
             }
             
-            $month = (int)$_GET['month'];
-            $year = (int)$_GET['year'];
+            $startDate = $_GET['startDate'];
+            $endDate = $_GET['endDate'];
             
             $orderModel = $this->loadModel('Order');
-            $topCustomers = $orderModel->getTopCustomers($month, $year);
+            $topCustomers = $orderModel->getTopCustomersByDateRange($startDate, $endDate);
             
             header('Content-Type: application/json');
             echo json_encode($topCustomers ?? []);
@@ -76,8 +76,8 @@ class DashboardController extends \BaseController {
             }
 
             $userId = (int)$params[0];
-            $month = isset($_GET['month']) ? (int)$_GET['month'] : date('m');
-            $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+            $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : date('Y-m-d', strtotime('-7 days'));
+            $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : date('Y-m-d');
             
             $orderModel = $this->loadModel('Order');
             $userModel = $this->loadModel('User');
@@ -87,7 +87,7 @@ class DashboardController extends \BaseController {
                 throw new Exception('Không tìm thấy thông tin khách hàng với ID: ' . $userId);
             }
 
-            $orders = $orderModel->getCustomerMonthlyOrdersWithDetails($userId, $month, $year);
+            $orders = $orderModel->getCustomerOrdersByDateRange($userId, $startDate, $endDate);
             $totalOrders = count($orders);
             $totalAmount = array_sum(array_column($orders, 'tongTien'));
 
@@ -96,8 +96,8 @@ class DashboardController extends \BaseController {
                 'title' => 'Chi tiết đơn hàng',
                 'customerData' => $customerData,
                 'orders' => $orders,
-                'month' => $month,
-                'year' => $year,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
                 'totalOrders' => $totalOrders,
                 'totalAmount' => $totalAmount
             ]);

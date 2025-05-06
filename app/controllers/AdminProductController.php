@@ -16,22 +16,35 @@ class AdminProductController extends BaseController {
     }
 
     public function index() {
+        // Lấy tham số page từ URL, mặc định là trang 1
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         
-        // Debug để kiểm tra dữ liệu
-        // echo '<pre>'; print_r($products); echo '</pre>';
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        $this->generator($page);
         
         $this->view('admin/layouts/main', $this->data);
     }
 
-    public function generator()
+    public function generator($page = 1)
     {
-        $products = $this->productModel->getAll();
+        // Lấy danh sách sản phẩm theo phân trang
+        $productData = $this->productModel->getAllWithPagination($page, 6);
         $categories = $this->categoryModel->getAll();
+        
         $this->data['content'] = 'admin/products/index.php';
         $this->data['title'] = 'Quản lý sản phẩm';
         $this->data['currentPage'] = 'products';
-        $this->data['products'] = $products;
+        $this->data['products'] = $productData['products'];
         $this->data['categories'] = $categories;
+        $this->data['pagination'] = [
+            'currentPage' => $productData['currentPage'],
+            'totalPages' => $productData['totalPages'],
+            'total' => $productData['total']
+        ];
     }
 
     public function add()
@@ -119,17 +132,32 @@ class AdminProductController extends BaseController {
         {
             $formData['maGiay'] = $_POST['maGiay'];
             
-            $isDeleteProduct = $this->productModel->delete($formData['maGiay']);
-            if($isDeleteProduct)
+            $result = $this->productModel->delete($formData['maGiay']);
+            
+            if($result['success'])
             {
+                if($result['action'] == 'lock') {
+                    echo "<script>
+                            localStorage.setItem('showToast', 'success');
+                            localStorage.setItem('toastMessage', 'Sản phẩm đã được khóa vì đã tồn tại trong đơn hàng');
+                            window.location.href = '" . BASE_URL . "/admin/products';
+                        </script>";
+                } else {
+                    echo "<script>
+                            localStorage.setItem('showToast', 'success');
+                            localStorage.setItem('toastMessage', 'Sản phẩm đã được xóa hoàn toàn');
+                            window.location.href = '" . BASE_URL . "/admin/products';
+                        </script>";
+                }
+                exit();
+            } else {
                 echo "<script>
-                        localStorage.setItem('showToast', 'success');
-                        localStorage.setItem('toastMessage', 'Khóa thành công');
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', '" . $result['message'] . "');
                         window.location.href = '" . BASE_URL . "/admin/products';
                     </script>";
                 exit();
             }
-
         }
     }
 
