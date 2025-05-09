@@ -151,6 +151,13 @@ function updateQuantity(action) {
 
 function addToCart(productId) {
     const quantity = document.getElementById('quantity').value;
+
+    const maTK = localStorage.getItem('maTK');
+    if(!maTK)
+    {
+        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        return;
+    }
     
     fetch(BASE_URL + "/cart/add", {
         method: 'POST',

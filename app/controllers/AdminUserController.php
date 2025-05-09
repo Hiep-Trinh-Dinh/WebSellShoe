@@ -58,7 +58,7 @@ class AdminUserController extends BaseController {
 
                 $data = [
                     'tenTK' => $username,
-                    'matKhau' => md5($password),
+                    'matKhau' => $password,
                     'maQuyen' => $role,
                     'trangThai' => $status
                 ];

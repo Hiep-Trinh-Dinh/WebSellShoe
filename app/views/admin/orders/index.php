@@ -107,6 +107,8 @@
 </div>
 
 <script>
+const BASE_URL = window.location.origin + "/Web2";
+
 function updateOrderStatus(orderId, status) {
     if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng?')) {
         fetch(`${BASE_URL}/admin/orders/update-status`, {
@@ -119,6 +121,7 @@ function updateOrderStatus(orderId, status) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                
                 window.location.reload();
             } else {
                 alert(data.message || 'Có lỗi xảy ra');

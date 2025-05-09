@@ -114,6 +114,8 @@ class AuthController extends BaseController {
         session_destroy();
         echo "<script> 
                     localStorage.removeItem('maTK');
+                    localStorage.removeItem('cartItem');
+                    localStorage.removeItem('cartItems');
                     window.location.href = '" . BASE_URL . "/login';
             </script>";
         exit();

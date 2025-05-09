@@ -167,7 +167,7 @@
     // LẤY DỮ LIỆU TỪ LOCAL STORAGE VÀ ĐỔ VÀO TRANG CART
     let subtotal = 0;
     let shipping = 0;
-    let tax = 5000;
+    let tax = 0;
     let totalQuantity = 0;
     let total = 0;
     let rawCart = JSON.parse(localStorage.getItem('cartItems')) || []; 
