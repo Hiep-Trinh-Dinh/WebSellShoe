@@ -22,7 +22,7 @@ class AuthController extends BaseController {
     public function processLogin() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = $_POST['username'];
-            $password = $_POST['password'];
+            $password = md5($_POST['password']); // Mã hóa mật khẩu để so sánh
             
             $user = $this->userModel->getUserByUsername($username);
             
@@ -74,9 +74,10 @@ class AuthController extends BaseController {
 
     public function processRegister() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Lấy dữ liệu từ form
             $data = [
-                'tenTK' => $_POST['username'],
-                'matKhau' => $_POST['password'],
+                'tenTK' => trim($_POST['username']),
+                'matKhau' => md5($_POST['password']), // Mã hóa mật khẩu
                 'maQuyen' => 2, // Quyền mặc định cho người dùng mới
                 'trangThai' => 1 // Trạng thái hoạt động
             ];
@@ -95,12 +96,19 @@ class AuthController extends BaseController {
                 exit();
             }
 
-            if ($this->userModel->createUser($data)) {
-                $_SESSION['success'] = 'Đăng ký thành công! Vui lòng đăng nhập.';
-                header('Location: ' . BASE_URL . '/login');
-                exit();
-            } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra, vui lòng thử lại';
+            try {
+                if ($this->userModel->createUser($data)) {
+                    $_SESSION['success'] = 'Đăng ký thành công! Vui lòng đăng nhập.';
+                    header('Location: ' . BASE_URL . '/login');
+                    exit();
+                } else {
+                    $_SESSION['error'] = 'Có lỗi xảy ra, vui lòng thử lại';
+                    header('Location: ' . BASE_URL . '/register');
+                    exit();
+                }
+            } catch (PDOException $e) {
+                error_log("Lỗi đăng ký: " . $e->getMessage());
+                $_SESSION['error'] = 'Lỗi hệ thống: ' . $e->getMessage();
                 header('Location: ' . BASE_URL . '/register');
                 exit();
             }
@@ -114,6 +122,8 @@ class AuthController extends BaseController {
         session_destroy();
         echo "<script> 
                     localStorage.removeItem('maTK');
+                    localStorage.removeItem('cartItem');
+                    localStorage.removeItem('cartItems');
                     window.location.href = '" . BASE_URL . "/login';
             </script>";
         exit();

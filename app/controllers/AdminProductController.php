@@ -58,6 +58,24 @@ class AdminProductController extends BaseController {
             $formData['giaBan'] = $_POST['giaBan'];
             $formData['tonKho']= $_POST['tonKho'];
             $formData['hinhAnh'] = $_POST['hinhAnh'];
+            if($formData['giaBan'] < 0)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Giá bán không được nhỏ hơn 0');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+            if($formData['tonKho'] < 0)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Tồn kho không được nhỏ hơn 0');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
             $isTenGiayExists = $this->productModel->isTenGiayExists($formData['tenGiay'], $formData['size']);
             if($isTenGiayExists)
             {
@@ -103,6 +121,25 @@ class AdminProductController extends BaseController {
             $formData['tonKho']= $_POST['tonKho'];
             $formData['hinhAnh'] = $_POST['hinhAnhMoi'] ? $_POST['hinhAnhMoi'] : $_POST['hinhAnhCu'];
             $formData['trangThai']= $_POST['trangThai'];
+
+            if($formData['giaBan'] < 0)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Giá bán không được nhỏ hơn 0');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+            if($formData['tonKho'] < 0)
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Tồn kho không được nhỏ hơn 0');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
 
             $isEditProduct = $this->productModel->update($formData['maGiay'], $formData);
             if($isEditProduct)

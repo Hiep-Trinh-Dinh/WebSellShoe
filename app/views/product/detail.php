@@ -115,9 +115,6 @@
                             class="flex-1 bg-yellow-500 text-white rounded-md py-3 font-medium hover:bg-yellow-600">
                         Thêm vào giỏ hàng
                     </button>
-                    <button class="flex-1 border border-yellow-500 text-yellow-500 rounded-md py-3 font-medium hover:bg-yellow-50">
-                        Mua ngay
-                    </button>
                 </div>
             </div>
 
@@ -146,11 +143,15 @@ function updateQuantity(action) {
     }
 }
 
-
-
-
 function addToCart(productId) {
     const quantity = document.getElementById('quantity').value;
+
+    const maTK = localStorage.getItem('maTK');
+    if(!maTK)
+    {
+        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        return;
+    }
     
     fetch(BASE_URL + "/cart/add", {
         method: 'POST',

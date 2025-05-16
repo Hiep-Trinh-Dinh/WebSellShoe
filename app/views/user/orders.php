@@ -28,16 +28,16 @@
                                 </p>
                                 <p class="text-sm <?php 
                                     switch($order->getTrangThai()) {
-                                        case 0:
+                                        case 1:
                                             echo 'text-yellow-500">Chờ xử lý';
                                             break;
-                                        case 1:
+                                        case 2:
                                             echo 'text-blue-500">Đang giao';
                                             break;
-                                        case 2:
+                                        case 3:
                                             echo 'text-green-500">Đã giao';
                                             break;
-                                        case 3:
+                                        case 4:
                                             echo 'text-red-500">Đã hủy';
                                             break;
                                         default:

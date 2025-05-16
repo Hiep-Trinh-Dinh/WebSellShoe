@@ -2,7 +2,7 @@
     <!-- Hero Section -->
     <section class="relative h-[600px] w-full overflow-hidden">
         <div class="absolute inset-0 bg-black/40 z-10"></div>
-        <img src="<?php echo BASE_URL; ?>/public/images/hero-banner.jpg" alt="Hero Image" class="absolute inset-0 object-cover w-full h-full">
+        <img src="<?php echo BASE_URL; ?>/public/img/logo-page.png" alt="Hero Image" class="absolute inset-0 object-cover w-full h-full">
         <div class="container relative z-20 flex h-full flex-col items-center justify-center text-center text-white">
             <h1 class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
                 Step Into <span class="text-yellow-400">Style</span>
@@ -28,11 +28,12 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <?php
                 $categories = ['Nam', 'Nữ', 'Trẻ em'];
-                foreach ($categories as $category):
+                $categories_img = ['shoe_for_men', 'shoe_for_women', 'shoe_for_kids'];
+                foreach ($categories as $key => $category):
                 ?>
                 <a href="<?php echo BASE_URL; ?>/products?category=<?php echo strtolower($category); ?>" 
                    class="group relative h-80 overflow-hidden rounded-lg">
-                    <img src="<?php echo BASE_URL; ?>/public/images/category-<?php echo strtolower($category); ?>.jpg" 
+                    <img src="<?php echo BASE_URL; ?>/public/img/<?php echo $categories_img[$key]; ?>.jpg" 
                          alt="<?php echo $category; ?>"
                          class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
                     <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors"></div>
@@ -167,6 +168,13 @@ const BASE_URL = window.location.origin + "/Web2";
 
 function addToCart(productId) {
     const quantity = 1;
+
+    const maTK = localStorage.getItem('maTK');
+    if(!maTK)
+    {
+        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        return;
+    }
     
     fetch(BASE_URL + "/cart/add", {
         method: 'POST',

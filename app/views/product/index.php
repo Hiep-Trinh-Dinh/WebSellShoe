@@ -172,6 +172,13 @@ const BASE_URL = window.location.origin + "/Web2";
 
 function addToCart(productId, event) {
     const quantity = 1;
+
+    const maTK = localStorage.getItem('maTK');
+    if(!maTK)
+    {
+        alert('Vui lòng đăng nhập trước khi thêm vào giỏ hàng');
+        return;
+    }
     
     fetch(BASE_URL + "/cart/add", {
         method: 'POST',
