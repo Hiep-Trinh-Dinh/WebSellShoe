@@ -1,11 +1,27 @@
-CREATE DATABASE IF NOT EXISTS web_ban_giay;
+DROP DATABASE IF EXISTS web_ban_giay;
+CREATE DATABASE web_ban_giay;
 USE web_ban_giay;
 
 /* DATA TABLE */
+DROP TABLE IF EXISTS ChiTietHoaDon;
+DROP TABLE IF EXISTS HoaDon;
+DROP TABLE IF EXISTS ChiTietPhieuNhap;
+DROP TABLE IF EXISTS PhieuNhap;
+DROP TABLE IF EXISTS Giay;
+DROP TABLE IF EXISTS LoaiGiay;
+DROP TABLE IF EXISTS NhaCungCap;
+DROP TABLE IF EXISTS TaiKhoan;
+DROP TABLE IF EXISTS Quyen;
+
 CREATE TABLE IF NOT EXISTS Quyen (
 	maQuyen INT AUTO_INCREMENT PRIMARY KEY,
     tenQuyen VARCHAR(50)
 );
+
+/* Thêm dữ liệu mẫu cho bảng Quyen */
+INSERT INTO Quyen (maQuyen, tenQuyen) VALUES 
+(1, 'Admin'),
+(2, 'Khách hàng');
 
 CREATE TABLE IF NOT EXISTS TaiKhoan (
     maTK INT AUTO_INCREMENT PRIMARY KEY,

@@ -2,7 +2,7 @@
     <!-- Hero Section -->
     <section class="relative h-[600px] w-full overflow-hidden">
         <div class="absolute inset-0 bg-black/40 z-10"></div>
-        <img src="<?php echo BASE_URL; ?>/public/images/hero-banner.jpg" alt="Hero Image" class="absolute inset-0 object-cover w-full h-full">
+        <img src="<?php echo BASE_URL; ?>/public/img/logo-page.png" alt="Hero Image" class="absolute inset-0 object-cover w-full h-full">
         <div class="container relative z-20 flex h-full flex-col items-center justify-center text-center text-white">
             <h1 class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
                 Step Into <span class="text-yellow-400">Style</span>

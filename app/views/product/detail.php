@@ -115,9 +115,6 @@
                             class="flex-1 bg-yellow-500 text-white rounded-md py-3 font-medium hover:bg-yellow-600">
                         Thêm vào giỏ hàng
                     </button>
-                    <button class="flex-1 border border-yellow-500 text-yellow-500 rounded-md py-3 font-medium hover:bg-yellow-50">
-                        Mua ngay
-                    </button>
                 </div>
             </div>
 
@@ -145,9 +142,6 @@ function updateQuantity(action) {
         input.value = currentValue - 1;
     }
 }
-
-
-
 
 function addToCart(productId) {
     const quantity = document.getElementById('quantity').value;
