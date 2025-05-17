@@ -26,28 +26,39 @@ class AuthController extends BaseController {
             
             $user = $this->userModel->getUserByUsername($username);
             
-            if ($user && $user->getMatKhau() === $password && $user->getTrangThai() == 1) {
-                // Đăng nhập thành công
-                $_SESSION['user_id'] = $user->getMaTK();
-                $_SESSION['username'] = $user->getTenTK();
-                $_SESSION['user_role'] = $user->getMaQuyen();
-                $_SESSION['success'] = 'Đăng nhập thành công!';
+            if ($user) {
+                if ($user->getTrangThai() == 0) {
+                    // Tài khoản bị khóa
+                    $_SESSION['error'] = 'Tài khoản đã bị khóa';
+                    header('Location: ' . BASE_URL . '/login');
+                    exit();
+                } else if ($user->getMatKhau() === $password) {
+                    // Đăng nhập thành công
+                    $_SESSION['user_id'] = $user->getMaTK();
+                    $_SESSION['username'] = $user->getTenTK();
+                    $_SESSION['user_role'] = $user->getMaQuyen();
+                    $_SESSION['success'] = 'Đăng nhập thành công!';
 
-                echo "<script> 
-                        localStorage.setItem('maTK', '" . $user->getMaTK() . "') 
-                    </script>";
-                
-                // Chuyển hướng dựa vào quyền
-                if ($user->getMaQuyen() == 1) {
                     echo "<script> 
-                        window.location.href = '" . BASE_URL . "/admin'; 
-                    </script>";
+                            localStorage.setItem('maTK', '" . $user->getMaTK() . "') 
+                        </script>";
+                    
+                    // Chuyển hướng dựa vào quyền
+                    if ($user->getMaQuyen() == 1) {
+                        echo "<script> 
+                            window.location.href = '" . BASE_URL . "/admin'; 
+                        </script>";
+                    } else {
+                        echo "<script> 
+                            window.location.href = '" . BASE_URL . "/';
+                        </script>";
+                    }
+                    exit();
                 } else {
-                    echo "<script> 
-                        window.location.href = '" . BASE_URL . "/';
-                    </script>";
+                    $_SESSION['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
+                    header('Location: ' . BASE_URL . '/login');
+                    exit();
                 }
-                exit();
             } else {
                 $_SESSION['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
                 header('Location: ' . BASE_URL . '/login');

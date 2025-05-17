@@ -117,13 +117,6 @@
                     </button>
                 </div>
             </div>
-
-            <div class="border-t pt-6">
-                <h3 class="font-medium">Mô tả sản phẩm</h3>
-                <div class="prose prose-sm mt-4">
-                    <p>Thông tin chi tiết về sản phẩm...</p>
-                </div>
-            </div>
         </div>
     </div>
 </div>

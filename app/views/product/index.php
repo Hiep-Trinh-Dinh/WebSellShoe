@@ -14,6 +14,8 @@
                 Tìm kiếm
             </button>
         </div>
+        <!-- Luôn bắt đầu tìm kiếm từ trang 1 -->
+        <input type="hidden" name="page" value="1">
     </form>
 
     <div class="flex flex-col md:flex-row gap-8">
@@ -22,8 +24,8 @@
             <form action="<?php echo BASE_URL; ?>/products/search" method="GET" id="filterForm">
                 <!-- Giữ lại keyword nếu có -->
                 <input type="hidden" name="keyword" value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>">
-                <!-- Giữ lại trang hiện tại -->
-                <input type="hidden" name="page" value="<?php echo isset($currentPage) ? $currentPage : 1; ?>">
+                <!-- Không giữ lại trang hiện tại, luôn bắt đầu từ trang 1 khi lọc -->
+                <input type="hidden" name="page" value="1">
                 
                 <div class="sticky top-24 rounded-lg border p-4">
                     <div class="flex items-center justify-between mb-4">
@@ -169,6 +171,28 @@
 
 <script>
 const BASE_URL = window.location.origin + "/Web2";
+
+// Xử lý nút đặt lại bộ lọc
+document.addEventListener('DOMContentLoaded', function() {
+    const resetButton = document.querySelector('button[type="reset"]');
+    if (resetButton) {
+        resetButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Xóa tất cả checkbox đã chọn
+            document.querySelectorAll('#filterForm input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Đặt lại dropdown
+            document.querySelectorAll('#filterForm select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            // Giữ lại từ khóa tìm kiếm nếu có
+            const keyword = document.querySelector('#filterForm input[name="keyword"]').value;
+            // Chuyển đến trang lọc với trang = 1 và giữ lại keyword
+            window.location.href = `${BASE_URL}/products/search?page=1${keyword ? '&keyword=' + encodeURIComponent(keyword) : ''}`;
+        });
+    }
+});
 
 function addToCart(productId, event) {
     const quantity = 1;

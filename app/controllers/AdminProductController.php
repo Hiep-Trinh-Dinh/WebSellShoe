@@ -198,24 +198,92 @@ class AdminProductController extends BaseController {
         }
     }
 
-    public function unlock()
+    public function unlock($id)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST')
-        {
-            $formData['maGiay'] = $_POST['maGiay'];
-            
-            $isUnlockProduct = $this->productModel->unlock($formData['maGiay']);
-            if($isUnlockProduct)
+        try {
+            $result = $this->productModel->unlock($id);
+            if($result)
             {
                 echo "<script>
                         localStorage.setItem('showToast', 'success');
-                        localStorage.setItem('toastMessage', 'Mở khóa thành công');
+                        localStorage.setItem('toastMessage', 'Sản phẩm đã được mở khóa');
                         window.location.href = '" . BASE_URL . "/admin/products';
                     </script>";
                 exit();
             }
-
+            else
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Mở khóa thất bại');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+        } catch (Exception $e) {
+            echo "<script>
+                    localStorage.setItem('showToast', 'error');
+                    localStorage.setItem('toastMessage', 'Có lỗi xảy ra: " . $e->getMessage() . "');
+                    window.location.href = '" . BASE_URL . "/admin/products';
+                </script>";
+            exit();
         }
     }
 
-} 
+    public function search() {
+        // Lấy tham số tìm kiếm từ URL
+        $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+        $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : 0;
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        
+        // Đảm bảo page là giá trị hợp lệ
+        if ($page < 1) {
+            $page = 1;
+        }
+        
+        // Tạo mảng filters
+        $filters = [];
+        if ($categoryId > 0) {
+            $filters['categories'] = [$categoryId];
+        }
+        
+        // Gọi phương thức searchProducts từ model
+        $productData = $this->productModel->searchProducts($keyword, $filters, $page, 6);
+        $categories = $this->categoryModel->getAll();
+        
+        // Chuyển đổi đối tượng Product thành mảng associative
+        $productsArray = [];
+        foreach ($productData['products'] as $product) {
+            if (is_object($product)) {
+                $productsArray[] = [
+                    'maGiay' => $product->getMaGiay(),
+                    'tenGiay' => $product->getTenGiay(),
+                    'maLoaiGiay' => $product->getMaLoaiGiay(),
+                    'tenLoaiGiay' => $product->getTenLoaiGiay(),
+                    'size' => $product->getSize(),
+                    'giaBan' => $product->getGiaBan(),
+                    'tonKho' => $product->getTonKho(),
+                    'hinhAnh' => $product->getHinhAnh(),
+                    'trangThai' => $product->getTrangThai()
+                ];
+            }
+        }
+        
+        // Chuẩn bị dữ liệu cho view
+        $this->data['content'] = 'admin/products/index.php';
+        $this->data['title'] = 'Kết quả tìm kiếm sản phẩm';
+        $this->data['currentPage'] = 'products';
+        $this->data['products'] = $productsArray;
+        $this->data['categories'] = $categories;
+        $this->data['keyword'] = $keyword;
+        $this->data['selectedCategory'] = $categoryId;
+        $this->data['pagination'] = [
+            'currentPage' => $productData['currentPage'],
+            'totalPages' => $productData['totalPages'],
+            'total' => $productData['total']
+        ];
+        
+        $this->view('admin/layouts/main', $this->data);
+    }
+}
+?> 

@@ -180,21 +180,24 @@ class Product extends BaseModel {
                     
             $params = [];
             
-            // Thêm điều kiện tìm kiếm
+            // Thêm điều kiện tìm kiếm theo từ
             if (!empty($keyword)) {
                 $searchTerm = trim(mb_strtolower($keyword, 'UTF-8'));
+                
+                // Tách chuỗi tìm kiếm thành các từ riêng biệt
+                $words = preg_split('/\s+/', $searchTerm);
                 $searchConditions = [];
                 
-                for ($i = 0; $i < mb_strlen($searchTerm, 'UTF-8'); $i++) {
-                    $char = mb_substr($searchTerm, $i, 1, 'UTF-8');
-                    if ($char !== ' ') {
-                        $key = ":char{$i}";
+                foreach ($words as $i => $word) {
+                    if (!empty($word)) {
+                        $key = ":word{$i}";
                         $searchConditions[] = "LOWER(g.tenGiay) LIKE {$key}";
-                        $params[$key] = "%{$char}%";
+                        $params[$key] = "%{$word}%";
                     }
                 }
                 
                 if (!empty($searchConditions)) {
+                    // Sử dụng AND để tìm tất cả từ trong chuỗi tìm kiếm
                     $whereClause = " AND (" . implode(' AND ', $searchConditions) . ")";
                     $sql .= $whereClause;
                     $countSql .= $whereClause;

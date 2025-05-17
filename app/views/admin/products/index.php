@@ -94,6 +94,43 @@
     </div>
     
     <div class="p-6">
+        <!-- Tìm kiếm và Bộ lọc -->
+        <div class="mb-6">
+            <form action="<?php echo BASE_URL; ?>/admin/products/search" method="GET" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[300px]">
+                    <label for="keyword" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm theo tên sản phẩm</label>
+                    <input 
+                        type="text" 
+                        name="keyword" 
+                        id="keyword" 
+                        placeholder="Nhập tên sản phẩm..." 
+                        class="form-control w-full"
+                        value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>"
+                    >
+                </div>
+                <div class="w-60">
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Lọc theo loại sản phẩm</label>
+                    <select name="category" id="category" class="form-select w-full">
+                        <option value="0">Tất cả loại</option>
+                        <?php if (!empty($categories)): ?>
+                            <?php foreach ($categories as $category): ?>
+                                <?php if ($category['trangThai'] != 0): ?>
+                                    <option value="<?php echo $category['maLoaiGiay']; ?>" <?php echo (isset($selectedCategory) && $selectedCategory == $category['maLoaiGiay']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($category['tenLoaiGiay']); ?>
+                                    </option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="btn btn-primary px-4 py-2">
+                        <i class="fas fa-search mr-1"></i> Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -327,39 +364,54 @@
         </div>
         
         <!-- Phân trang -->
-        <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
+        <?php
+        $currentPage = isset($pagination['currentPage']) ? $pagination['currentPage'] : 1;
+        $totalPages = isset($pagination['totalPages']) ? $pagination['totalPages'] : 0;
+        
+        if ($totalPages > 1):
+        ?>
         <div class="flex justify-center mt-6">
-            <nav class="flex items-center space-x-2">
-                <?php if ($pagination['currentPage'] > 1): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $pagination['currentPage'] - 1; ?>" 
-                       class="px-3 py-1 rounded border hover:bg-gray-100">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                <?php endif; ?>
-                
-                <?php
-                // Hiển thị số trang
-                $startPage = max(1, $pagination['currentPage'] - 2);
-                $endPage = min($pagination['totalPages'], $startPage + 4);
-                
-                if ($endPage - $startPage < 4 && $startPage > 1) {
-                    $startPage = max(1, $endPage - 4);
-                }
-                
-                for ($i = $startPage; $i <= $endPage; $i++):
-                ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $i; ?>" 
-                       class="px-3 py-1 rounded border <?php echo $i == $pagination['currentPage'] ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                <?php endfor; ?>
-                
-                <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/products?page=<?php echo $pagination['currentPage'] + 1; ?>" 
-                       class="px-3 py-1 rounded border hover:bg-gray-100">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                <?php endif; ?>
+            <nav aria-label="Page navigation">
+                <ul class="pagination flex">
+                    <?php if ($currentPage > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link px-3 py-2 border rounded hover:bg-gray-100" 
+                           href="<?php 
+                                $params = $_GET;
+                                $params['page'] = $currentPage - 1;
+                                echo BASE_URL . (isset($keyword) || isset($selectedCategory) ? '/admin/products/search?' : '/admin/products?') . http_build_query($params);
+                            ?>">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?php echo $i === $currentPage ? 'active' : ''; ?>">
+                        <a class="page-link px-3 py-2 border rounded mx-1 <?php echo $i === $currentPage ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>" 
+                           href="<?php 
+                                $params = $_GET;
+                                $params['page'] = $i;
+                                echo BASE_URL . (isset($keyword) || isset($selectedCategory) ? '/admin/products/search?' : '/admin/products?') . http_build_query($params);
+                            ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    </li>
+                    <?php endfor; ?>
+                    
+                    <?php if ($currentPage < $totalPages): ?>
+                    <li class="page-item">
+                        <a class="page-link px-3 py-2 border rounded hover:bg-gray-100" 
+                           href="<?php 
+                                $params = $_GET;
+                                $params['page'] = $currentPage + 1;
+                                echo BASE_URL . (isset($keyword) || isset($selectedCategory) ? '/admin/products/search?' : '/admin/products?') . http_build_query($params);
+                            ?>">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+                </ul>
             </nav>
         </div>
         <?php endif; ?>
