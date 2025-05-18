@@ -9,6 +9,7 @@ class Product extends BaseModel {
     protected $size;
     protected $giaBan;
     protected $tonKho;
+    protected $moTa;
     protected $hinhAnh;
     protected $trangThai;
     protected $tenLoaiGiay; // Thuộc tính phụ từ bảng LoaiGiay
@@ -20,6 +21,7 @@ class Product extends BaseModel {
     public function getSize() { return $this->size; }
     public function getGiaBan() { return $this->giaBan; }
     public function getTonKho() { return $this->tonKho; }
+    public function getMoTa() { return $this->moTa; }
     public function getHinhAnh() { return $this->hinhAnh; }
     public function getTrangThai() { return $this->trangThai; }
     public function getTenLoaiGiay() { return $this->tenLoaiGiay; }
@@ -31,6 +33,7 @@ class Product extends BaseModel {
     public function setSize($size) { $this->size = $size; }
     public function setGiaBan($giaBan) { $this->giaBan = $giaBan; }
     public function setTonKho($tonKho) { $this->tonKho = $tonKho; }
+    public function setMoTa($moTa) { $this->moTa= $moTa; }
     public function setHinhAnh($hinhAnh) { $this->hinhAnh = $hinhAnh; }
     public function setTrangThai($trangThai) { $this->trangThai = $trangThai; }
     public function setTenLoaiGiay($tenLoaiGiay) { $this->tenLoaiGiay = $tenLoaiGiay; }
@@ -44,6 +47,7 @@ class Product extends BaseModel {
             $this->size = $data['size'] ?? null;
             $this->giaBan = $data['giaBan'] ?? null;
             $this->tonKho = $data['tonKho'] ?? null;
+            $this->moTa = $data['moTa'] ?? null;
             $this->hinhAnh = $data['hinhAnh'] ?? null;
             $this->trangThai = $data['trangThai'] ?? null;
             $this->tenLoaiGiay = $data['tenLoaiGiay'] ?? null;
@@ -60,6 +64,7 @@ class Product extends BaseModel {
             'size' => $this->size,
             'giaBan' => $this->giaBan,
             'tonKho' => $this->tonKho,
+            'moTa' => $this->moTa,
             'hinhAnh' => $this->hinhAnh,
             'trangThai' => $this->trangThai,
             'tenLoaiGiay' => $this->tenLoaiGiay
@@ -376,8 +381,8 @@ class Product extends BaseModel {
     public function add($formData) {
         extract($formData);
         $hinhAnh = base64_encode($hinhAnh);
-        $sql = "INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho, hinhAnh) 
-                VALUES (:tenGiay, :maLoaiGiay, :size, :giaBan, :tonKho, :hinhAnh)";
+        $sql = "INSERT INTO Giay (tenGiay, maLoaiGiay, size, giaBan, tonKho, hinhAnh, moTa) 
+                VALUES (:tenGiay, :maLoaiGiay, :size, :giaBan, :tonKho, :hinhAnh, :moTa)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':tenGiay' => $tenGiay,
@@ -385,7 +390,8 @@ class Product extends BaseModel {
             ':size' => $size,
             ':giaBan' => $giaBan,
             ':tonKho' => $tonKho,
-            ':hinhAnh' => $hinhAnh
+            ':hinhAnh' => $hinhAnh,
+            ':moTa' => $moTa
         ]);
     }
 
@@ -406,6 +412,7 @@ class Product extends BaseModel {
                     size = :size, 
                     giaBan = :giaBan, 
                     tonKho = :tonKho,
+                    moTa = :moTa,
                     hinhAnh = :hinhAnh,
                     trangThai = :trangThai";
         
@@ -415,6 +422,7 @@ class Product extends BaseModel {
             ':size' => $size,
             ':giaBan' => $giaBan,
             ':tonKho' => $tonKho,
+            ':moTa' => $moTa,
             ':hinhAnh' => $hinhAnh,
             ':trangThai' => $trangThai,
             ':id' => $id

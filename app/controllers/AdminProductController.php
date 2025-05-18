@@ -57,7 +57,24 @@ class AdminProductController extends BaseController {
             $formData['size'] = $_POST['size'];
             $formData['giaBan'] = $_POST['giaBan'];
             $formData['tonKho']= $_POST['tonKho'];
-            $formData['hinhAnh'] = $_POST['hinhAnh'];
+            $formData['moTa']= $_POST['moTa'];
+            $formData['hinhAnh'] = $_FILES['hinhAnh']['name'];
+
+            $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/Web2/public/img/' . basename($_FILES['hinhAnh']['name']);
+
+            // Di chuyển file
+            if (!move_uploaded_file($_FILES['hinhAnh']['tmp_name'], $uploadPath)) 
+            {
+                echo "<script>
+                        localStorage.setItem('showToast', 'error');
+                        localStorage.setItem('toastMessage', 'Lỗi khi lưu hình ảnh');
+                        window.location.href = '" . BASE_URL . "/admin/products';
+                    </script>";
+                exit();
+            }
+
+
+
             if($formData['giaBan'] < 0)
             {
                 echo "<script>
@@ -119,8 +136,26 @@ class AdminProductController extends BaseController {
             $formData['size'] = $_POST['size'];
             $formData['giaBan'] = $_POST['giaBan'];
             $formData['tonKho']= $_POST['tonKho'];
-            $formData['hinhAnh'] = $_POST['hinhAnhMoi'] ? $_POST['hinhAnhMoi'] : $_POST['hinhAnhCu'];
+            $formData['moTa']= $_POST['moTa'];
+            $formData['hinhAnh'] = $_FILES['hinhAnhMoi']['name'] ? $_FILES['hinhAnhMoi']['name'] : $_POST['hinhAnhCu'];
             $formData['trangThai']= $_POST['trangThai'];
+
+            if($_FILES['hinhAnhMoi']['name'])
+            {
+                $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/Web2/public/img/' . basename($_FILES['hinhAnhMoi']['name']);
+    
+                // Di chuyển file
+                if (!move_uploaded_file($_FILES['hinhAnhMoi']['tmp_name'], $uploadPath)) 
+                {
+                    echo "<script>
+                            localStorage.setItem('showToast', 'error');
+                            localStorage.setItem('toastMessage', 'Lỗi khi lưu hình ảnh');
+                            window.location.href = '" . BASE_URL . "/admin/products';
+                        </script>";
+                    exit();
+                }
+
+            }
 
             if($formData['giaBan'] < 0)
             {

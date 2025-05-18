@@ -79,18 +79,18 @@
 
                         <div>
                             <label class="block text-sm font-medium mb-2">Số điện thoại <span class="text-red-500">*</span></label>
-                            <input type="text" name="soDienThoai" value="<?php echo htmlspecialchars($user->getSoDienThoai() ?? ''); ?>"
+                            <input type="text" id="soDienThoai" name="soDienThoai" value="<?php echo htmlspecialchars($user->getSoDienThoai() ?? ''); ?>"
                                    class="w-full rounded-md border px-3 py-2" required
                                    pattern="[0-9]{10}"
                                    title="Số điện thoại phải có đúng 10 chữ số"
-                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);">
-                            <p class="text-xs text-red-500 mt-1">Bắt buộc nhập số điện thoại (10 chữ số) để mua hàng</p>
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10); checkEmpty('soDienThoai', 'msgSDT');">
+                            <p id="msgSDT" class="text-xs text-red-500 mt-1 hidden">Bắt buộc nhập số điện thoại (10 chữ số) để mua hàng</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium mb-2">Địa chỉ <span class="text-red-500">*</span></label>
-                            <textarea name="diaChi" class="w-full rounded-md border px-3 py-2" rows="3" required><?php echo htmlspecialchars($user->getDiaChi() ?? ''); ?></textarea>
-                            <p class="text-xs text-red-500 mt-1">Bắt buộc nhập địa chỉ để mua hàng</p>
+                            <textarea id="diaChi" name="diaChi" class="w-full rounded-md border px-3 py-2" rows="3" required oninput="checkEmpty('diaChi', 'msgDiaChi');"><?php echo htmlspecialchars($user->getDiaChi() ?? ''); ?></textarea>
+                            <p id="msgDiaChi" class="text-xs text-red-500 mt-1 hidden">Bắt buộc nhập địa chỉ để mua hàng</p>
                         </div>
 
                         <div>
@@ -176,3 +176,15 @@
         </div>
     </div>
 </div> 
+
+<script>
+function checkEmpty(inputId, msgId) {
+    const input = document.getElementById(inputId);
+    const message = document.getElementById(msgId);
+    if (input.value.trim() === "") {
+        message.classList.remove("hidden");
+    } else {
+        message.classList.add("hidden");
+    }
+}
+</script>

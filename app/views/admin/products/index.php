@@ -18,7 +18,7 @@
                         <h5 class="modal-title">Thêm giày</h5>
                     </div>
                     <div class="modal-body">
-                        <form action="products/add" method="POST" class="needs-validation" novalidate>
+                        <form action="products/add" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                             <div class="mb-3">
                                 <label for="" class="col-form-label">Hình ảnh:</label>
                                 <label class="preview" for="hinhAnh">
@@ -77,6 +77,14 @@
                             <div class="mb-3">
                                 <label for="tonKho" class="col-form-label">Tồn kho:</label>
                                 <input type="text" class="form-control" id="tonKho" name="tonKho" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng không để trống trường này
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="moTa" class="col-form-label">Mô tả:</label>
+                                <textarea type="text" class="form-control" id="moTa<?php echo $product['maGiay'] ?>" name="moTa" required>
+                                </textarea>
                                 <div class="invalid-feedback">
                                     Vui lòng không để trống trường này
                                 </div>
@@ -142,6 +150,7 @@
                         <th class="pb-4">Giá bán</th>
                         <th class="pb-4">Tồn kho</th>
                         <th class="pb-4">Trạng thái</th>
+                        <th class="pb-4">Mô tả</th>
                         <th class="pb-4">Thao tác</th>
                     </tr>
                 </thead>
@@ -155,12 +164,14 @@
                             <td class="py-4"><?php echo $product['size'] ?? ''; ?></td>
                             <td class="py-4"><?php echo number_format($product['giaBan'] ?? 0, 0, ',', '.'); ?>đ</td>
                             <td class="py-4"><?php echo $product['tonKho'] ?? 0; ?></td>
+                            
                             <td class="py-4">
                                 <span class="px-2 py-1 rounded-full text-xs 
                                     <?php echo $product['trangThai'] == 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; ?>">
                                     <?php echo $product['trangThai'] == 1 ? 'Hoạt động' : 'Khóa'; ?>
                                 </span>
                             </td>
+                            <td class="py-4 max-w-[100px] truncate"><?php echo $product['moTa'] ?? ''; ?></td>
                             <td class="py-4">
                                 <!--- Begin Modal Edit Product -->
                                 <?php if($product['trangThai'] != 0): ?>
@@ -174,6 +185,7 @@
                                         data-size="<?php echo $product['size']; ?>"
                                         data-giaBan="<?php echo $product['giaBan']; ?>"
                                         data-tonKho="<?php echo $product['tonKho']; ?>"
+                                        data-moTa="<?php echo $product['moTa']; ?>"
                                         data-hinhAnh="<?php echo base64_decode($product['hinhAnh']); ?>"
                                         data-trangThai="<?php echo $product['trangThai']; ?>"
                                     >
@@ -186,7 +198,7 @@
                                                     <h5 class="modal-title">Edit giày</h5>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form action="products/edit" method="POST" class="needs-validation" novalidate>
+                                                    <form action="products/edit" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                                                         <input type="hidden"  id="maGiay" name="maGiay"  value="<?php echo $product['maGiay'] ?>" >
                                                         <div class="mb-3" style="display: flex; gap: 20px;">
                                                             <div>
@@ -264,7 +276,14 @@
                                                                 <option value="1">Hoạt động</option>
                                                                 <option value="0">Khóa</option>
                                                             </select>
-    
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="moTa" class="col-form-label">Mô tả:</label>
+                                                            <textarea type="text" class="form-control" id="moTa<?php echo $product['maGiay'] ?>" name="moTa" required>
+                                                            </textarea>
+                                                            <div class="invalid-feedback">
+                                                                Vui lòng không để trống trường này
+                                                            </div>
                                                         </div>
                                                         <div class="mt-3" style="float: right;">
                                                             <button type="button" class="btn btn-secondary" id="edit-close-btn<?php echo $product["maGiay"] ?>" data-bs-dismiss="modal">Close</button>
@@ -489,6 +508,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let giaBan = btn.getAttribute("data-giaBan");
             let tonKho = btn.getAttribute("data-tonKho");
             let trangThai = btn.getAttribute("data-trangThai");
+            let moTa = btn.getAttribute("data-moTa");
 
 
             // Gán giá trị vào input trong modal
@@ -498,6 +518,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("giaBan" + maGiay).value = giaBan;
             document.getElementById("tonKho" + maGiay).value = tonKho;
             document.getElementById("trangThai" + maGiay).value = trangThai;
+            document.getElementById("moTa" + maGiay).value = moTa;
             
 
             // Thay đổi ảnh
