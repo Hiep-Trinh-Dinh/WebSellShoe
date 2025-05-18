@@ -202,10 +202,9 @@ class Order extends BaseModel {
         try {
             $sql = "SELECT hd.*, tk.tenTK,
                     CASE 
-                        WHEN hd.trangThai = 0 THEN 'Chờ xác nhận'
-                        WHEN hd.trangThai = 1 THEN 'Đã xác nhận'
-                        WHEN hd.trangThai = 2 THEN 'Đang giao'
-                        WHEN hd.trangThai = 3 THEN 'Đã giao'
+                        WHEN hd.trangThai = 1 THEN 'Đang xử lý'
+                        WHEN hd.trangThai = 2 THEN 'Đang giao hàng'
+                        WHEN hd.trangThai = 3 THEN 'Đã giao hàng'
                         WHEN hd.trangThai = 4 THEN 'Đã hủy'
                         ELSE 'Không xác định'
                     END as trangThaiText
@@ -760,7 +759,7 @@ class Order extends BaseModel {
                     FROM TaiKhoan tk
                     LEFT JOIN HoaDon hd ON tk.maTK = hd.maTK 
                         AND DATE(hd.ngayTao) BETWEEN :startDate AND :endDate
-                        AND hd.trangThai != 4 /* Không tính đơn đã hủy */
+                        AND hd.trangThai = 3 /* Chỉ tính đơn đã giao hàng */
                     WHERE tk.maQuyen = 2 /* Chỉ lấy tài khoản khách hàng */
                     GROUP BY tk.maTK, tk.tenTK
                     HAVING tongChiTieu > 0
@@ -796,7 +795,7 @@ class Order extends BaseModel {
                     LEFT JOIN Giay g ON cthd.maGiay = g.maGiay
                     WHERE hd.maTK = :userId 
                         AND DATE(hd.ngayTao) BETWEEN :startDate AND :endDate
-                        AND hd.trangThai != 4 /* Không tính đơn đã hủy */
+                        AND hd.trangThai = 3 /* Chỉ tính đơn đã giao hàng */
                     GROUP BY hd.maHD, hd.ngayTao, hd.tongTien, hd.trangThai, hd.diaChi
                     ORDER BY hd.ngayTao DESC";
                         

@@ -265,10 +265,12 @@ function viewOrderDetail(orderId) {
             const content = document.getElementById('orderModalContent');
             
             let statusText = '';
-            switch(data.trangThai) {
-                case 1: statusText = 'Đang giao'; break;
-                case 2: statusText = 'Đã giao'; break;
-                case 3: statusText = 'Đã hủy'; break;
+            switch(parseInt(data.trangThai)) {
+                case 1: statusText = 'Đang xử lý'; break;
+                case 2: statusText = 'Đã xác nhận'; break;
+                case 3: statusText = 'Đang giao hàng'; break;
+                case 4: statusText = 'Đã giao hàng'; break;
+                case 5: statusText = 'Đã hủy'; break;
                 default: statusText = 'Chờ xử lý';
             }
 

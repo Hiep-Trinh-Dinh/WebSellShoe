@@ -40,12 +40,15 @@
                         <span class="info-label">Trạng thái:</span>
                         <div class="status-select-wrapper">
                             <select class="status-select" data-id="<?php echo $order['maHD']; ?>">
-                                <option value="1" <?php echo $order['trangThai'] == 1 ? 'selected' : ''; ?>>Đang xử lý</option>
-                                <option value="2" <?php echo $order['trangThai'] == 2 ? 'selected' : ''; ?>>Đã xác nhận</option>
-                                <option value="3" <?php echo $order['trangThai'] == 3 ? 'selected' : ''; ?>>Đang giao hàng</option>
-                                <option value="4" <?php echo $order['trangThai'] == 4 ? 'selected' : ''; ?>>Đã giao hàng</option>
-                                <option value="5" <?php echo $order['trangThai'] == 5 ? 'selected' : ''; ?>>Đã hủy</option>
+                                <option value="1" <?php echo (int)$order['trangThai'] === 1 ? 'selected' : ''; ?>>Đang xử lý</option>
+                                <option value="2" <?php echo (int)$order['trangThai'] === 2 ? 'selected' : ''; ?>>Đang giao hàng</option>
+                                <option value="3" <?php echo (int)$order['trangThai'] === 3 ? 'selected' : ''; ?>>Đã giao hàng</option>
+                                <option value="4" <?php echo (int)$order['trangThai'] === 4 ? 'selected' : ''; ?>>Đã hủy</option>
                             </select>
+                            <!-- Debug info -->
+                            <p style="font-size: 10px; margin-top: 5px; color: #888;">
+                                Giá trị hiện tại: <?php echo $order['trangThai']; ?> (<?php echo gettype($order['trangThai']); ?>)
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -326,23 +329,19 @@ body {
 
 /* Status colors */
 .status-select[data-id="<?php echo $order['maHD']; ?>"] {
-    <?php if ($order['trangThai'] == 1): ?>
+    <?php if ((int)$order['trangThai'] === 1): ?>
     border-color: #3b82f6;
     background-color: #eff6ff;
     color: #1d4ed8;
-    <?php elseif ($order['trangThai'] == 2): ?>
-    border-color: #8b5cf6;
-    background-color: #f5f3ff;
-    color: #6d28d9;
-    <?php elseif ($order['trangThai'] == 3): ?>
+    <?php elseif ((int)$order['trangThai'] === 2): ?>
     border-color: #f59e0b;
     background-color: #fffbeb;
     color: #b45309;
-    <?php elseif ($order['trangThai'] == 4): ?>
+    <?php elseif ((int)$order['trangThai'] === 3): ?>
     border-color: #10b981;
     background-color: #ecfdf5;
     color: #047857;
-    <?php elseif ($order['trangThai'] == 5): ?>
+    <?php elseif ((int)$order['trangThai'] === 4): ?>
     border-color: #ef4444;
     background-color: #fef2f2;
     color: #b91c1c;
@@ -352,52 +351,28 @@ body {
 
 <script>
 $(document).ready(function() {
+    // Lấy trạng thái hiện tại để so sánh sau khi cập nhật
+    var currentStatus = parseInt('<?php echo $order['trangThai']; ?>');
+    console.log("Trạng thái hiện tại:", currentStatus, "- Kiểu dữ liệu:", typeof currentStatus);
+    
     $('.status-select').change(function() {
         var orderId = $(this).data('id');
-        var status = $(this).val();
+        var status = parseInt($(this).val()); // Đảm bảo giá trị status là số nguyên
         var $select = $(this);
         
-        // Remove all status-related classes
-        $select.removeClass('status-processing status-confirmed status-shipping status-delivered status-cancelled');
+        console.log("Đang cập nhật trạng thái đơn hàng #" + orderId + " từ: " + currentStatus + " sang: " + status);
         
-        // Add appropriate class based on selected status
-        switch(parseInt(status)) {
-            case 1:
-                $select.css({
-                    'border-color': '#3b82f6',
-                    'background-color': '#eff6ff',
-                    'color': '#1d4ed8'
-                });
-                break;
-            case 2:
-                $select.css({
-                    'border-color': '#8b5cf6',
-                    'background-color': '#f5f3ff',
-                    'color': '#6d28d9'
-                });
-                break;
-            case 3:
-                $select.css({
-                    'border-color': '#f59e0b',
-                    'background-color': '#fffbeb',
-                    'color': '#b45309'
-                });
-                break;
-            case 4:
-                $select.css({
-                    'border-color': '#10b981',
-                    'background-color': '#ecfdf5',
-                    'color': '#047857'
-                });
-                break;
-            case 5:
-                $select.css({
-                    'border-color': '#ef4444',
-                    'background-color': '#fef2f2',
-                    'color': '#b91c1c'
-                });
-                break;
+        // Hiển thị hộp thoại xác nhận
+        if (!confirm('Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng từ ' + 
+                    getStatusText(currentStatus) + ' thành ' + 
+                    getStatusText(status) + '?')) {
+            // Nếu người dùng không xác nhận, đặt lại giá trị select
+            $(this).val(currentStatus);
+            return false;
         }
+        
+        // Hiển thị thông báo đang xử lý
+        showNotification('Đang cập nhật trạng thái...', 'info');
         
         $.ajax({
             url: '<?php echo BASE_URL; ?>/admin/orders/update-status',
@@ -406,13 +381,98 @@ $(document).ready(function() {
                 orderId: orderId,
                 status: status
             },
+            dataType: 'json',
             success: function(response) {
-                // Optional: Add success notification
+                console.log("Response from server:", response);
+                if (response.success) {
+                    showNotification('Cập nhật trạng thái thành công!', 'success');
+                    
+                    // Ghi log thông tin cập nhật
+                    console.log("Cập nhật thành công - Trạng thái cũ: " + response.oldStatus + ", Trạng thái mới: " + response.newStatus);
+                    
+                    // Tải lại trang sau 1 giây để hiển thị trạng thái mới
+                    setTimeout(function() {
+                        window.location.href = '<?php echo BASE_URL; ?>/admin/orders/view/' + orderId;
+                    }, 1000);
+                } else {
+                    showNotification('Có lỗi xảy ra khi cập nhật trạng thái: ' + (response.message || 'Không xác định'), 'error');
+                    console.error("Error response:", response);
+                    // Đặt lại giá trị select
+                    $select.val(currentStatus);
+                }
             },
-            error: function() {
-                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+                console.log("Status:", status);
+                console.log("Response:", xhr.responseText);
+                showNotification('Có lỗi xảy ra: ' + error, 'error');
+                // Đặt lại giá trị select
+                $select.val(currentStatus);
             }
         });
     });
+    
+    // Hàm hiển thị thông báo
+    function showNotification(message, type) {
+        var bgColor, textColor;
+        
+        switch(type) {
+            case 'success':
+                bgColor = '#d1fae5';
+                textColor = '#047857';
+                break;
+            case 'error':
+                bgColor = '#fee2e2';
+                textColor = '#b91c1c';
+                break;
+            case 'info':
+            default:
+                bgColor = '#e0f2fe';
+                textColor = '#0369a1';
+                break;
+        }
+        
+        // Tạo và hiển thị thông báo
+        var $notification = $('<div>')
+            .text(message)
+            .css({
+                'position': 'fixed',
+                'top': '20px',
+                'right': '20px',
+                'background-color': bgColor,
+                'color': textColor,
+                'padding': '10px 15px',
+                'border-radius': '4px',
+                'box-shadow': '0 2px 5px rgba(0,0,0,0.2)',
+                'z-index': '9999',
+                'opacity': '0',
+                'transition': 'opacity 0.3s ease'
+            })
+            .appendTo('body');
+        
+        // Hiệu ứng hiển thị
+        setTimeout(function() {
+            $notification.css('opacity', '1');
+        }, 10);
+        
+        // Tự động ẩn sau 3 giây
+        setTimeout(function() {
+            $notification.css('opacity', '0');
+            setTimeout(function() {
+                $notification.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Hàm chuyển đổi mã trạng thái thành văn bản
+    function getStatusText(statusCode) {
+        switch(parseInt(statusCode)) {
+            case 1: return 'Đang xử lý';
+            case 2: return 'Đang giao hàng';
+            case 3: return 'Đã giao hàng';
+            case 4: return 'Đã hủy';
+            default: return 'Không xác định';
+        }
+    }
 });
 </script>
