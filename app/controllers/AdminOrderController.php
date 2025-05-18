@@ -12,28 +12,58 @@ class AdminOrderController extends BaseController {
     }
 
     public function index() {
-        // Lấy tham số page từ URL, mặc định là trang 1
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        
-        // Đảm bảo page là giá trị hợp lệ
-        if ($page < 1) {
-            $page = 1;
+        try {
+            // Lấy tham số từ URL
+            $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+            $searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
+            $status = isset($_GET['status']) && $_GET['status'] !== '' ? intval($_GET['status']) : null;
+            
+            // Debug để kiểm tra dữ liệu đầu vào
+            error_log("AdminOrderController::index - Page: $page, Search: $searchTerm, Status: " . ($status !== null ? $status : 'null'));
+            
+            // Định nghĩa các trạng thái đơn hàng
+            $orderStatuses = [
+                1 => 'Đang xử lý',
+                2 => 'Đang giao hàng',
+                3 => 'Đã giao hàng',
+                4 => 'Đã hủy'
+            ];
+            
+            // Lấy danh sách đơn hàng theo tìm kiếm hoặc tất cả
+            if (!empty($searchTerm)) {
+                // Nếu có từ khóa tìm kiếm, sử dụng phương thức tìm kiếm
+                $result = $this->orderModel->searchOrdersByPhoneOrAddress($searchTerm, $page, 6, $status);
+                error_log("Tìm kiếm với từ khóa: '$searchTerm', trạng thái: " . ($status !== null ? $status : 'tất cả'));
+            } else if ($status !== null) {
+                // Nếu chỉ có lọc theo trạng thái, không có tìm kiếm
+                $result = $this->orderModel->getOrdersWithPagination($page, 6, $status);
+                error_log("Lọc theo trạng thái: $status");
+            } else {
+                // Lấy tất cả đơn hàng
+                $result = $this->orderModel->getOrdersWithPagination($page, 6);
+                error_log("Lấy tất cả đơn hàng");
+            }
+            
+            // Truyền dữ liệu sang view
+            $data = [
+                'content' => 'admin/orders/index.php',
+                'title' => 'Quản lý đơn hàng',
+                'currentPage' => 'orders',
+                'orders' => $result['orders'],
+                'totalPages' => $result['totalPages'],
+                'currentPage' => $result['currentPage'],
+                'searchTerm' => $searchTerm,
+                'total' => $result['total'],
+                'status' => $status,
+                'orderStatuses' => $orderStatuses
+            ];
+            
+            $this->view('admin/layouts/main', $data);
+            
+        } catch (Exception $e) {
+            error_log("Error in AdminOrderController::index: " . $e->getMessage());
+            echo "Lỗi: " . $e->getMessage();
         }
-        
-        // Lấy danh sách đơn hàng có phân trang
-        $orderData = $this->orderModel->getOrdersWithPagination($page, 6);
-        
-        $this->view('admin/layouts/main', [
-            'content' => 'admin/orders/index.php',
-            'title' => 'Quản lý đơn hàng',
-            'currentPage' => 'orders',
-            'orders' => $orderData['orders'],
-            'pagination' => [
-                'currentPage' => $orderData['currentPage'],
-                'totalPages' => $orderData['totalPages'],
-                'total' => $orderData['total']
-            ]
-        ]);
     }
 
     protected function getOrderStatus($status) {

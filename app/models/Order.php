@@ -360,42 +360,86 @@ class Order extends BaseModel {
         }
     }
 
-    public function getOrdersWithPagination($page = 1, $limit = 6) {
+    public function getOrdersWithPagination($page = 1, $limit = 6, $status = null) {
         try {
             // Tính offset
             $offset = ($page - 1) * $limit;
             
+            // Xây dựng điều kiện SQL
+            $whereClause = '';
+            $params = [];
+            
+            // Thêm điều kiện lọc theo trạng thái nếu có
+            if ($status !== null && $status !== '') {
+                $whereClause = ' WHERE hd.trangThai = :status';
+                $params[':status'] = $status;
+                error_log("Lọc đơn hàng theo trạng thái: $status");
+            }
+            
             // Lấy tổng số đơn hàng
-            $totalSql = "SELECT COUNT(*) as total FROM HoaDon";
+            $totalSql = "SELECT COUNT(*) as total FROM HoaDon hd" . $whereClause;
             $totalStmt = $this->db->prepare($totalSql);
+            
+            // Bind các tham số nếu có
+            foreach ($params as $param => $value) {
+                $totalStmt->bindValue($param, $value, PDO::PARAM_INT);
+            }
+            
             $totalStmt->execute();
             $total = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Debug số lượng đơn hàng tìm thấy
+            error_log("Tổng số đơn hàng: $total" . ($status !== null ? ", trạng thái: $status" : ""));
             
             // Lấy danh sách đơn hàng theo phân trang
             $sql = "SELECT hd.*, tk.tenTK, tk.soDT as soDienThoai 
                     FROM HoaDon hd
-                    LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
-                    ORDER BY hd.ngayTao DESC, hd.maHD DESC 
+                    LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK"
+                    . $whereClause . 
+                   " ORDER BY hd.ngayTao DESC, hd.maHD DESC 
                     LIMIT :limit OFFSET :offset";
                     
+            error_log("SQL query: $sql");
             $stmt = $this->db->prepare($sql);
+            
+            // Bind các tham số nếu có
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, PDO::PARAM_INT);
+            }
+            
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
             
+            $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Debug đơn hàng tìm thấy
+            if (!empty($orders)) {
+                $orderIds = array_column($orders, 'maHD');
+                error_log("Các đơn hàng tìm thấy: " . implode(', ', $orderIds));
+            } else {
+                error_log("Không tìm thấy đơn hàng nào" . ($status !== null ? " với trạng thái: $status" : ""));
+            }
+            
             return [
-                'orders' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+                'orders' => $orders,
                 'total' => $total,
                 'totalPages' => ceil($total / $limit),
-                'currentPage' => $page
+                'currentPage' => $page,
+                'status' => $status
             ];
         } catch (PDOException $e) {
             error_log("Error in getOrdersWithPagination: " . $e->getMessage());
+            error_log("SQL state: " . $e->errorInfo[0]);
+            error_log("SQL error code: " . $e->errorInfo[1]);
+            error_log("SQL error message: " . $e->errorInfo[2]);
+            
             return [
                 'orders' => [],
                 'total' => 0,
                 'totalPages' => 1,
-                'currentPage' => 1
+                'currentPage' => 1,
+                'status' => $status
             ];
         }
     }
@@ -831,6 +875,181 @@ class Order extends BaseModel {
         } catch (PDOException $e) {
             error_log("Error in getCustomerOrdersByDateRange: " . $e->getMessage());
             return [];
+        }
+    }
+
+    public function searchOrdersByPhoneOrAddress($searchTerm, $page = 1, $limit = 6, $status = null) {
+        try {
+            // Debug để kiểm tra từ khóa tìm kiếm và trạng thái
+            error_log("Tìm kiếm với từ khóa: " . $searchTerm . ", trạng thái: " . ($status !== null ? $status : 'tất cả'));
+            
+            // Chuẩn hóa từ khóa tìm kiếm
+            $searchTerm = trim($searchTerm);
+            
+            // Kiểm tra xem từ khóa có phải là số điện thoại không
+            $isPhoneSearch = preg_match('/^[0-9\s\-\+\.()]*$/', $searchTerm) && strlen(preg_replace('/[^0-9]/', '', $searchTerm)) >= 3;
+            
+            // Xử lý số điện thoại để tìm kiếm
+            $cleanPhone = preg_replace('/[^0-9]/', '', $searchTerm); // Chỉ giữ lại các chữ số
+            
+            // Tính offset cho phân trang
+            $offset = ($page - 1) * $limit;
+            
+            // Xây dựng điều kiện WHERE
+            $whereConditions = [];
+            $params = [];
+            
+            // Điều kiện tìm kiếm theo số điện thoại hoặc địa chỉ
+            if ($isPhoneSearch) {
+                // Nếu là số điện thoại, sử dụng tìm kiếm chính xác hơn cho số điện thoại
+                $whereConditions[] = "(
+                    REPLACE(hd.soDienThoai, ' ', '') LIKE :exactPhone1 OR 
+                    REPLACE(tk.soDT, ' ', '') LIKE :exactPhone2 OR
+                    REPLACE(hd.soDienThoai, ' ', '') LIKE :endPhone1 OR
+                    REPLACE(tk.soDT, ' ', '') LIKE :endPhone2 OR
+                    REPLACE(hd.soDienThoai, ' ', '') LIKE :anyPhone1 OR
+                    REPLACE(tk.soDT, ' ', '') LIKE :anyPhone2
+                )";
+                
+                // Các mẫu tìm kiếm số điện thoại khác nhau
+                $exactPhone = $cleanPhone;                   // Tìm chính xác
+                $endPhone = '%' . $cleanPhone;               // Kết thúc với các số này
+                $anyPhone = '%' . $cleanPhone . '%';         // Chứa các số này ở bất kỳ vị trí nào
+                
+                $params[':exactPhone1'] = $exactPhone;
+                $params[':exactPhone2'] = $exactPhone;
+                $params[':endPhone1'] = $endPhone;
+                $params[':endPhone2'] = $endPhone;
+                $params[':anyPhone1'] = $anyPhone;
+                $params[':anyPhone2'] = $anyPhone;
+                
+                error_log("Tìm kiếm số điện thoại với mẫu: exactPhone=$exactPhone, endPhone=$endPhone, anyPhone=$anyPhone");
+            } else {
+                // Xử lý địa chỉ - tách thành các từ để tìm kiếm
+                $keywords = explode(' ', $searchTerm);
+                $keywords = array_filter($keywords, function($keyword) {
+                    return !empty($keyword); // Loại bỏ các từ trống
+                });
+                
+                // Nếu là tìm kiếm địa chỉ
+                if (!empty($keywords)) {
+                    $addressConditions = "(";
+                    foreach ($keywords as $index => $keyword) {
+                        if ($index > 0) {
+                            $addressConditions .= " AND ";
+                        }
+                        // Tìm kiếm theo từng từ trong địa chỉ
+                        $addressConditions .= "LOWER(hd.diaChi) LIKE LOWER(:addressKeyword$index)";
+                        $params[":addressKeyword$index"] = '%' . $keyword . '%';
+                    }
+                    $addressConditions .= ")";
+                    $whereConditions[] = $addressConditions;
+                }
+            }
+            
+            // Thêm điều kiện lọc theo trạng thái
+            if ($status !== null && $status !== '') {
+                $whereConditions[] = "hd.trangThai = :status";
+                $params[':status'] = $status;
+                error_log("Áp dụng lọc trạng thái: $status");
+            }
+            
+            // Xây dựng WHERE clause cuối cùng
+            $whereClause = "";
+            if (!empty($whereConditions)) {
+                $whereClause = "WHERE " . implode(" AND ", $whereConditions);
+            }
+            
+            // Truy vấn tìm kiếm đơn hàng để lấy số lượng tổng
+            $countSql = "
+                SELECT COUNT(DISTINCT hd.maHD) as total 
+                FROM HoaDon hd
+                LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
+                $whereClause";
+            
+            error_log("SQL count: $countSql");
+            $countStmt = $this->db->prepare($countSql);
+            
+            // Bind các giá trị tìm kiếm
+            foreach ($params as $param => $value) {
+                $countStmt->bindValue($param, $value, PDO::PARAM_STR);
+            }
+            
+            $countStmt->execute();
+            $totalRows = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            error_log("Tìm thấy tổng cộng: $totalRows kết quả");
+            
+            // Truy vấn để lấy dữ liệu đơn hàng phù hợp với điều kiện tìm kiếm
+            $sql = "
+                SELECT DISTINCT hd.*, tk.tenTK, COALESCE(hd.soDienThoai, tk.soDT) as soDienThoai
+                FROM HoaDon hd
+                LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
+                $whereClause
+                ORDER BY hd.ngayTao DESC, hd.maHD DESC
+                LIMIT :limit OFFSET :offset
+            ";
+            
+            error_log("SQL search: $sql");
+            $stmt = $this->db->prepare($sql);
+            
+            // Bind các giá trị tìm kiếm
+            foreach ($params as $param => $value) {
+                $stmt->bindValue($param, $value, PDO::PARAM_STR);
+            }
+            
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            
+            $stmt->execute();
+            $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Debug kết quả tìm kiếm
+            if (!empty($orders)) {
+                $orderIds = array_column($orders, 'maHD');
+                error_log("Các đơn hàng tìm thấy: " . implode(', ', $orderIds));
+                
+                // Log vài mẫu dữ liệu để kiểm tra
+                foreach (array_slice($orders, 0, 3) as $index => $order) {
+                    error_log("Đơn hàng #$index: maHD={$order['maHD']}, soDienThoai={$order['soDienThoai']}, diaChi={$order['diaChi']}, trangThai={$order['trangThai']}");
+                }
+            } else {
+                $statusText = $status !== null ? ", trạng thái: $status" : "";
+                error_log("Không tìm thấy đơn hàng nào với từ khóa: '$searchTerm', số đã làm sạch: '$cleanPhone'$statusText");
+                
+                // Lấy mẫu dữ liệu để hiểu cấu trúc dữ liệu
+                $debugSql = "
+                    SELECT hd.maHD, hd.soDienThoai, tk.soDT, hd.diaChi, hd.trangThai 
+                    FROM HoaDon hd
+                    LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
+                    LIMIT 10
+                ";
+                $debugStmt = $this->db->prepare($debugSql);
+                $debugStmt->execute();
+                $debugResults = $debugStmt->fetchAll(PDO::FETCH_ASSOC);
+                error_log("Mẫu dữ liệu trong DB: " . json_encode($debugResults, JSON_UNESCAPED_UNICODE));
+            }
+            
+            return [
+                'orders' => $orders,
+                'total' => $totalRows,
+                'totalPages' => ceil($totalRows / $limit),
+                'currentPage' => $page,
+                'status' => $status
+            ];
+        } catch (PDOException $e) {
+            error_log("Error in searchOrdersByPhoneOrAddress: " . $e->getMessage());
+            error_log("SQL state: " . $e->errorInfo[0]);
+            error_log("SQL error code: " . $e->errorInfo[1]);
+            error_log("SQL error message: " . $e->errorInfo[2]);
+            
+            return [
+                'orders' => [],
+                'total' => 0,
+                'totalPages' => 1,
+                'currentPage' => 1,
+                'status' => $status
+            ];
         }
     }
 }

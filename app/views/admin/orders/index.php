@@ -1,9 +1,101 @@
+<?php
+// Format giá tiền
+function formatPrice($price) {
+    return number_format($price, 0, ',', '.') . 'đ';
+}
+
+// Format trạng thái đơn hàng
+function formatStatus($status) {
+    switch ($status) {
+        case 1:
+            return '<span class="badge bg-warning text-dark">Đang xử lý</span>';
+        case 2:
+            return '<span class="badge bg-primary">Đang giao hàng</span>';
+        case 3:
+            return '<span class="badge bg-success">Đã giao hàng</span>';
+        case 4:
+            return '<span class="badge bg-danger">Đã hủy</span>';
+        default:
+            return '<span class="badge bg-secondary">Không xác định</span>';
+    }
+}
+?>
+
 <div class="bg-white shadow rounded-lg">
     <div class="p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold">Danh sách đơn hàng</h2>
+        <h2 class="text-xl font-semibold mb-4">Danh sách đơn hàng</h2>
+        
+        <!-- Search form -->
+        <form action="<?php echo BASE_URL; ?>/admin/orders" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="md:col-span-6 flex">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Tìm theo SĐT hoặc địa chỉ..."
+                    value="<?php echo htmlspecialchars($searchTerm ?? ''); ?>"
+                    class="border rounded-l-md px-4 py-2 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 flex-shrink-0"
+                >
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <div class="md:col-span-3">
+                <select 
+                    name="status" 
+                    class="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                    onchange="this.form.submit()"
+                >
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="1" <?php echo isset($status) && $status == 1 ? 'selected' : ''; ?>>Đang xử lý</option>
+                    <option value="2" <?php echo isset($status) && $status == 2 ? 'selected' : ''; ?>>Đang giao hàng</option>
+                    <option value="3" <?php echo isset($status) && $status == 3 ? 'selected' : ''; ?>>Đã giao hàng</option>
+                    <option value="4" <?php echo isset($status) && $status == 4 ? 'selected' : ''; ?>>Đã hủy</option>
+                </select>
+            </div>
+            
+            <?php if (!empty($searchTerm) || !empty($status)): ?>
+            <div class="md:col-span-3">
+                <a href="<?php echo BASE_URL; ?>/admin/orders" class="inline-block bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">
+                    <i class="fas fa-times mr-1"></i> Xóa bộ lọc
+                </a>
+            </div>
+            <?php endif; ?>
+        </form>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="mt-3 p-2 bg-red-50 text-red-700 border border-red-200 rounded-md">
+                <?= $_SESSION['error'] ?>
+                <?php unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
     </div>
     
     <div class="p-6">
+        <?php if (!empty($searchTerm) || $status !== null): ?>
+        <div class="mb-4 p-3 bg-blue-50 rounded-md border border-blue-100">
+            <p>
+                <?php if ($status !== null): ?>
+                <strong>Trạng thái: </strong>
+                <?php 
+                    switch($status) {
+                        case 1: echo 'Đang xử lý'; break;
+                        case 2: echo 'Đang giao hàng'; break;
+                        case 3: echo 'Đã giao hàng'; break;
+                        case 4: echo 'Đã hủy'; break;
+                        default: echo 'Tất cả';
+                    }
+                ?>
+                <?php endif; ?>
+                
+                <span class="ml-2">(<?php echo isset($pagination['total']) ? $pagination['total'] : $total ?? 0; ?> đơn hàng)</span>
+            </p>
+        </div>
+        <?php endif; ?>
+        
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -73,7 +165,7 @@
         <div class="flex justify-center mt-6">
             <nav class="flex items-center space-x-2">
                 <?php if ($pagination['currentPage'] > 1): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] - 1; ?>" 
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] - 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
                        class="px-3 py-1 rounded border hover:bg-gray-100">
                         <i class="fas fa-chevron-left"></i>
                     </a>
@@ -90,14 +182,14 @@
                 
                 for ($i = $startPage; $i <= $endPage; $i++):
                 ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $i; ?>" 
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $i; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
                        class="px-3 py-1 rounded border <?php echo $i == $pagination['currentPage'] ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
                         <?php echo $i; ?>
                     </a>
                 <?php endfor; ?>
                 
                 <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] + 1; ?>" 
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] + 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
                        class="px-3 py-1 rounded border hover:bg-gray-100">
                         <i class="fas fa-chevron-right"></i>
                     </a>
