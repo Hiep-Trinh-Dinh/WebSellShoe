@@ -298,6 +298,7 @@ class AdminProductController extends BaseController {
                     'size' => $product->getSize(),
                     'giaBan' => $product->getGiaBan(),
                     'tonKho' => $product->getTonKho(),
+                    'moTa' => $product->getMoTa(),
                     'hinhAnh' => $product->getHinhAnh(),
                     'trangThai' => $product->getTrangThai()
                 ];
