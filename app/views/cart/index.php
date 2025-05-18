@@ -119,16 +119,8 @@
                     </div>
                     <!-- End Modal Pay -->
 
-                    <div class="pt-4">
-                        <h3 class="font-medium mb-2">Địa chỉ</h3>
-                        <div class="flex">
-                            <input 
-                                type="text" placeholder="Nhập địa chỉ" 
-                                class="flex-1 rounded-l-md border border-r-0 px-3 py-2 text-sm"
-                                id="diaChiInput"
-                                required
-                            >
-                        </div>
+                    <div class="pt-4" id="profile-status">
+                        <!-- Thông tin trạng thái hồ sơ sẽ hiển thị ở đây -->
                     </div>
 
                     <div class="pt-4 text-sm text-gray-500">
@@ -324,61 +316,77 @@
 
     // GỬI DỮ LIỆU QUA CART CONTROLLER
     function pay() {
-        const BASE_URL = window.location.origin + "/Web2";
-        let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-        let maTK = localStorage.getItem('maTK');
-        let tienMat = document.getElementById('tienMatRadio');
-        let totalQuantity = document.getElementById('totalQuantity').innerText;
-        let total = document.getElementById('total').innerText;
-        let totalFormatted = parseInt(total.replace(/\./g, ''));
-        let diaChi = document.getElementById('diaChiInput').value;
-        let thanhToan = tienMat.checked == true ? 1 : 2;
-        const now = new Date();
-        const formattedDay = now.toISOString().slice(0, 19).replace('T', ' ');
+        const maTK = localStorage.getItem('maTK');
+        if (!maTK) {
+            alert('Vui lòng đăng nhập để thanh toán');
+            return;
+        }
+        
+        const thanhToan = document.getElementById('tienMatRadio').checked ? 1 : 2;
+        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || []; 
+        const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        let totalPrice = 0;
+        const totalQuantity = cartItems.reduce((total, item) => {
+            // Lấy giá trị giaBan và soLuong từ mỗi item
+            const product = JSON.parse(item.product);
+            totalPrice += product.giaBan * item.quantity;
+            return total + parseInt(item.quantity);
+        }, 0);
+
+        const data = {
+            cartItems: cartItems,
+            date: date,
+            totalQuantity: totalQuantity,
+            total: totalPrice,
+            thanhToan: thanhToan,
+            maTK: maTK
+        };
+
         fetch(BASE_URL + "/cart/pay", {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
-                cartItems: cartItems,
-                totalQuantity: totalQuantity,
-                total: totalFormatted,
-                thanhToan: thanhToan,
-                diaChi: diaChi,
-                date: formattedDay,
-                maTK: maTK
-
-            })
+            body: JSON.stringify(data)
         })
-        // .then(async (response) => {
-        //     const text = await response.text();
-        //     console.log("Raw response: ", text);
-        //     return JSON.parse(text); // parse thủ công để xem lỗi
-        // })
         .then(response => {
+            // Kiểm tra response trước khi parse JSON
+            if (!response.ok) {
+                // Kiểm tra nếu response là HTML thay vì JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('text/html')) {
+                    throw new Error('Lỗi máy chủ: Vui lòng thử lại sau');
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            // Kiểm tra content-type để đảm bảo là JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Phản hồi không đúng định dạng');
+            }
+            
             return response.json();
         })
         .then(data => {
-            if (data.success) 
-            {
-                localStorage.setItem('showToast', 'success');
-                localStorage.setItem('toastMessage', 'Đặt hàng thành công');
+            if (data.success) {
+                alert('Đặt hàng thành công!');
                 localStorage.removeItem('cartItems');
-                window.location.reload();
-            }
-            else 
-            {
-                localStorage.setItem('showToast', 'error');
-                localStorage.setItem('toastMessage', 'Đặt hàng thất bại');
-                window.location.reload();
+                window.location.href = BASE_URL + "/user/orders";
+            } else {
+                // Nếu lỗi liên quan đến thông tin cá nhân thì chuyển hướng đến trang cá nhân
+                if (data.message && data.message.includes('thông tin cá nhân')) {
+                    alert(data.message);
+                    window.location.href = BASE_URL + "/user";
+                } else {
+                    alert(data.message || 'Đặt hàng thất bại!');
+                }
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Có lỗi xảy ra');
+            alert('Có lỗi xảy ra khi đặt hàng: ' + error.message);
         });
-        
     }
 
     // XỬ LÝ PHẦN THANH TOÁN
@@ -389,17 +397,9 @@
     const tenUser = document.getElementById("tenUser");
 
     document.getElementById("btnOpenModal").addEventListener("click", function (e) {
-        const diaChiInput = document.getElementById("diaChiInput");
-        const diaChi = diaChiInput.value.trim();
-
-        if (diaChi === "") {
-            alert("Vui lòng nhập địa chỉ trước khi thanh toán!");
-            diaChiInput.focus();
-        } else {
-            // Mở modal bằng Bootstrap 5 JS
-            const modal = new bootstrap.Modal(document.getElementById("modalPay"));
-            modal.show();
-        }
+        // Mở modal bằng Bootstrap 5 JS, không kiểm tra hồ sơ
+        const modal = new bootstrap.Modal(document.getElementById("modalPay"));
+        modal.show();
     });
 
     tienMatRadio.addEventListener("change", function () {
@@ -420,18 +420,8 @@
 
     // RESET VALUES KHI ĐÓNG FORM THÊM SẢN PHẨM 
     document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('modalAddProduct').addEventListener('hidden.bs.modal', function () {
-            // Reset toàn bộ form
-            var form = document.querySelector('#modalAddProduct form');
-            form.reset();
-            form.classList.remove('was-validated');
-
-            // Xóa trạng thái validation lỗi (nếu có)
-            var invalidFields = document.querySelectorAll('.needs-validation .is-invalid');
-            invalidFields.forEach(function (field) {
-                field.classList.remove('is-invalid');
-            });
-        });
+        // Xóa code liên quan đến modalAddProduct không tồn tại
+        // Chỉ giữ lại các chức năng khác
     });
 
 
@@ -448,5 +438,135 @@
             form.classList.add('was-validated')
             }, false)
         });
+
+    // Biến kiểm tra xem người dùng đã hoàn thành thông tin cá nhân chưa
+    let userHasCompletedProfile = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra thông tin user và hiển thị trạng thái profile
+        checkUserProfile();
+        
+        // Hàm kiểm tra thông tin người dùng
+        function checkUserProfile() {
+            const maTK = localStorage.getItem('maTK');
+            const profileStatusElement = document.getElementById('profile-status');
+            
+            if (!maTK) {
+                profileStatusElement.innerHTML = `
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4">
+                        <p class="text-yellow-700">Vui lòng đăng nhập để tiếp tục thanh toán.</p>
+                        <a href="${BASE_URL}/login" class="text-blue-600 hover:underline mt-2 inline-block">
+                            Đăng nhập
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Hiển thị đang tải
+            profileStatusElement.innerHTML = `
+                <div class="bg-blue-100 border-l-4 border-blue-500 p-4">
+                    <p class="text-blue-700">Đang kiểm tra thông tin...</p>
+                </div>
+            `;
+            
+            // Kiểm tra thông tin đăng nhập từ session PHP (nếu có)
+            <?php if(isset($_SESSION['user_id'])): ?>
+            const sessionUserInfo = {
+                maTK: <?php echo json_encode($_SESSION['user_id']); ?>,
+                soDienThoai: <?php echo json_encode(isset($userInfo['soDienThoai']) ? $userInfo['soDienThoai'] : ''); ?>,
+                diaChi: <?php echo json_encode(isset($userInfo['diaChi']) ? $userInfo['diaChi'] : ''); ?>
+            };
+            
+            console.log("Thông tin người dùng từ PHP session:", sessionUserInfo);
+            
+            // Kiểm tra nếu ID người dùng trùng khớp với localStorage
+            if (sessionUserInfo.maTK == maTK) {
+                handleUserInfo(sessionUserInfo);
+                return;
+            }
+            <?php endif; ?>
+            
+            // Nếu không có thông tin từ session hoặc ID không khớp, gọi API
+            fetch(`${BASE_URL}/user/getUserInfo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `maTK=${maTK}`
+            })
+            .then(response => {
+                // Kiểm tra response trước khi parse JSON
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                // Kiểm tra content-type để đảm bảo là JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Phản hồi không phải định dạng JSON!');
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    handleUserInfo(data.user);
+                } else {
+                    throw new Error(data.message || 'Không thể lấy thông tin người dùng');
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi gọi API:', error);
+                
+                // Nếu API có lỗi, chuyển hướng người dùng đến trang profile để cập nhật thông tin
+                profileStatusElement.innerHTML = `
+                    <div class="bg-red-100 border-l-4 border-red-500 p-4">
+                        <p class="text-red-700">Không thể tải thông tin người dùng: ${error.message}</p>
+                        <p class="text-gray-700 mt-1">Vui lòng cập nhật thông tin cá nhân để tiếp tục.</p>
+                        <div class="mt-2">
+                            <a href="${BASE_URL}/user" class="text-blue-600 hover:underline mr-3">
+                                Cập nhật thông tin
+                            </a>
+                            <a href="${BASE_URL}/user/logout" class="text-blue-600 hover:underline">
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Xử lý thông tin người dùng
+        function handleUserInfo(userInfo) {
+            console.log('Xử lý thông tin người dùng:', userInfo);
+            const profileStatusElement = document.getElementById('profile-status');
+            
+            // Kiểm tra xem người dùng đã có đủ thông tin chưa
+            if (userInfo.soDienThoai && userInfo.diaChi && 
+                userInfo.soDienThoai.trim() !== '' && userInfo.diaChi.trim() !== '') {
+                userHasCompletedProfile = true;
+                profileStatusElement.innerHTML = `
+                    <div class="bg-green-100 border-l-4 border-green-500 p-4">
+                        <p class="text-green-700">Thông tin giao hàng đã được lấy từ hồ sơ cá nhân của bạn.</p>
+                        <p class="text-sm mt-1">
+                            Số điện thoại: ${userInfo.soDienThoai}<br>
+                            Địa chỉ: ${userInfo.diaChi}
+                        </p>
+                    </div>
+                `;
+            } else {
+                userHasCompletedProfile = false;
+                profileStatusElement.innerHTML = `
+                    <div class="bg-blue-100 border-l-4 border-blue-500 p-4">
+                        <p class="text-blue-700">Thông tin giao hàng sẽ được lấy từ hồ sơ cá nhân của bạn.</p>
+                        <a href="${BASE_URL}/user" class="text-blue-600 hover:underline mt-2 inline-block">
+                            Xem hồ sơ cá nhân
+                        </a>
+                    </div>
+                `;
+            }
+        }
+    });
 
 </script> 

@@ -14,6 +14,7 @@
                         <th class="pb-4">Số lượng</th>
                         <th class="pb-4">Tổng tiền</th>
                         <th class="pb-4">Thanh toán</th>
+                        <th class="pb-4">Số điện thoại</th>
                         <th class="pb-4">Địa chỉ</th>
                         <th class="pb-4">Trạng thái</th>
                         <th class="pb-4">Thao tác</th>
@@ -29,6 +30,7 @@
                             <td class="py-4"><?php echo $order['tongSoLuong']; ?></td>
                             <td class="py-4"><?php echo number_format($order['tongTien'], 0, ',', '.'); ?>đ</td>
                             <td class="py-4" ><?php echo $order['thanhToan'] == 1 ? "Tiền mặt" : "Chuyển khoản" ?></td>
+                            <td class="py-4"><?php echo $order['soDienThoai'] ?? 'Không có'; ?></td>
                             <td class="py-4"><?php echo $order['diaChi'] ?></td>
                             <td class="py-4">
                                 <select onchange="updateOrderStatus(<?php echo $order['maHD']; ?>, this.value)"
@@ -59,7 +61,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="py-4 text-center">Không có đơn hàng nào</td>
+                            <td colspan="9" class="py-4 text-center">Không có đơn hàng nào</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

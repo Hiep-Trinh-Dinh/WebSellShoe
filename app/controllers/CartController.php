@@ -57,16 +57,39 @@ class CartController extends BaseController {
     }
 
     public function pay() {
+        // Thiết lập header để đảm bảo phản hồi được nhận dạng là JSON
+        header('Content-Type: application/json; charset=utf-8');
+        
         $formDataHD = [];
         if ($_SERVER["REQUEST_METHOD"] == "POST") 
         {
             $rawData = file_get_contents("php://input");
             $data = json_decode($rawData, true);
             
-        
             if (isset($data["cartItems"])) 
             {
                 $cartItems = $data["cartItems"];
+                
+                // Lấy thông tin người dùng từ database thay vì từ form
+                $userModel = $this->loadModel('User');
+                $user = $userModel->getById($data['maTK']);
+                
+                if (!$user) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Không tìm thấy thông tin người dùng'
+                    ]);
+                    return;
+                }
+                
+                // Kiểm tra xem người dùng đã cập nhật thông tin chưa
+                if (empty($user->getSoDienThoai()) || empty($user->getDiaChi())) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Vui lòng cập nhật thông tin cá nhân trước khi thanh toán'
+                    ]);
+                    return;
+                }
                 
                 $formDataHD['ngayTao'] = $data['date'];
                 $formDataHD['tongSoLuong'] = $data['totalQuantity'];
@@ -74,44 +97,79 @@ class CartController extends BaseController {
                 $formDataHD['maTK'] = $data['maTK'];
                 $formDataHD['trangThai'] = 1;
                 $formDataHD['thanhToan'] = $data['thanhToan'];
-                $formDataHD['diaChi'] = $data['diaChi'];
+                $formDataHD['diaChi'] = $user->getDiaChi();
+                $formDataHD['soDienThoai'] = $user->getSoDienThoai();
 
-                $maHD = $this->orderModel->createHD($formDataHD);
+                // Tạo đơn hàng mới
+                $orderModel = $this->loadModel('Order');
+                $maHoaDon = $orderModel->createHD($formDataHD);
 
-                if($maHD)
+                if ($maHoaDon) 
                 {
+                    // Thêm sản phẩm vào chi tiết đơn hàng
+                    $allProductsAdded = true;
+                    $productModel = $this->loadModel('Product');
+
                     foreach ($cartItems as $item) 
                     {
                         $formDataCTHD = [];
                         $product = json_decode($item["product"], true);
                         $quantity = $item["quantity"];
-            
-                        $formDataCTHD['maHD'] = $maHD;
+
+                        $formDataCTHD['maHD'] = $maHoaDon;
                         $formDataCTHD['maGiay'] = $product['maGiay']; 
-                        $formDataCTHD['size'] = $product['size']; 
+                        $formDataCTHD['size'] = $product['size'] ?? ''; 
                         $formDataCTHD['giaBan'] = $product['giaBan'];
                         $formDataCTHD['soLuong'] = $quantity;
                         $formDataCTHD['thanhTien'] = $product['giaBan'] * $quantity;
-                        $this->productModel->decreaseStock($product['maGiay'], $quantity);
-                        $this->orderModel->createCTHD($formDataCTHD);
+
+                        // Thêm vào bảng chi tiết hóa đơn
+                        if (!$orderModel->createCTHD($formDataCTHD)) 
+                        {
+                            $allProductsAdded = false;
+                        }
+
+                        // Cập nhật số lượng sản phẩm
+                        $productModel->decreaseStock($product['maGiay'], $quantity);
                     }
-                    
-                    echo json_encode([
-                        'success' => true
-                    ]);
-                }
+
+                    if ($allProductsAdded) 
+                    {
+                        echo json_encode([
+                            'success' => true,
+                            'maHoaDon' => $maHoaDon
+                        ]);
+                    } 
+                    else 
+                    {
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Có lỗi khi thêm sản phẩm vào đơn hàng'
+                        ]);
+                    }
+                } 
                 else 
                 {
                     echo json_encode([
-                        'success' => false
+                        'success' => false,
+                        'message' => 'Có lỗi khi tạo đơn hàng'
                     ]);
                 }
-                
             } 
             else 
             {
-                echo "Không có dữ liệu giỏ hàng!";
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Dữ liệu không hợp lệ'
+                ]);
             }
+        } 
+        else 
+        {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Yêu cầu không hợp lệ'
+            ]);
         }
     }
 }

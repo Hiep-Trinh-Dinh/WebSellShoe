@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <tr class="text-left">
                         <th class="pb-4">Mã TK</th>
                         <th class="pb-4">Tên đăng nhập</th>
+                        <th class="pb-4">Số điện thoại</th>
                         <th class="pb-4">Quyền</th>
                         <th class="pb-4">Trạng thái</th>
                         <th class="pb-4">Thao tác</th>
@@ -298,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr class="border-t">
                             <td class="py-4"><?php echo $user['maTK']; ?></td>
                             <td class="py-4"><?php echo $user['tenTK']; ?></td>
+                            <td class="py-4"><?php echo $user['soDT'] ?? 'Chưa cập nhật'; ?></td>
                             <td class="py-4">
                                 <span class="px-2 py-1 rounded-full text-xs 
                                     <?php echo $user['maQuyen'] == 1 ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'; ?>">
@@ -349,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="5" class="py-4 text-center text-gray-500">Không có người dùng nào</td>
+                            <td colspan="6" class="py-4 text-center text-gray-500">Không có người dùng nào</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

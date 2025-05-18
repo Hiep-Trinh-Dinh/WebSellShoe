@@ -76,6 +76,23 @@
                             <input type="text" value="<?php echo htmlspecialchars($user->getTenTK()); ?>"
                                    class="w-full rounded-md border px-3 py-2" readonly>
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Số điện thoại <span class="text-red-500">*</span></label>
+                            <input type="text" name="soDienThoai" value="<?php echo htmlspecialchars($user->getSoDienThoai() ?? ''); ?>"
+                                   class="w-full rounded-md border px-3 py-2" required
+                                   pattern="[0-9]{10}"
+                                   title="Số điện thoại phải có đúng 10 chữ số"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').substring(0, 10);">
+                            <p class="text-xs text-red-500 mt-1">Bắt buộc nhập số điện thoại (10 chữ số) để mua hàng</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Địa chỉ <span class="text-red-500">*</span></label>
+                            <textarea name="diaChi" class="w-full rounded-md border px-3 py-2" rows="3" required><?php echo htmlspecialchars($user->getDiaChi() ?? ''); ?></textarea>
+                            <p class="text-xs text-red-500 mt-1">Bắt buộc nhập địa chỉ để mua hàng</p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium mb-2">Mật khẩu</label>
                             <button type="button" onclick="window.location.href='<?php echo BASE_URL; ?>/user/changePassword'"
@@ -88,6 +105,12 @@
                             <span class="<?php echo $user->getTrangThai() == 1 ? 'text-green-500' : 'text-red-500'; ?>">
                                 <?php echo $user->getTrangThai() == 1 ? 'Đang hoạt động' : 'Đã khóa'; ?>
                             </span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white rounded-md px-4 py-2">
+                                Cập nhật thông tin
+                            </button>
                         </div>
                     </div>
                 </form>

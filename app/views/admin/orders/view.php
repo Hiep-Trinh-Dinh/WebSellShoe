@@ -27,6 +27,16 @@
                     </div>
                     
                     <div class="info-item">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value"><?php echo $order['soDienThoai'] ?? 'Không có'; ?></span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Địa chỉ giao hàng:</span>
+                        <span class="info-value"><?php echo $order['diaChi'] ?? 'Không có'; ?></span>
+                    </div>
+                    
+                    <div class="info-item">
                         <span class="info-label">Tổng số lượng:</span>
                         <span class="info-value"><?php echo $order['tongSoLuong']; ?> sản phẩm</span>
                     </div>

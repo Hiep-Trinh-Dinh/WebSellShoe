@@ -147,8 +147,8 @@ class Order extends BaseModel {
 
     public function createHD($formDataHD) {
         extract($formDataHD);
-        $sql = "INSERT INTO HoaDon (ngayTao, tongSoLuong, tongTien, maTK, trangThai, thanhToan, diaChi) 
-                VALUES (:ngayTao, :tongSoLuong, :tongTien, :maTK, :trangThai, :thanhToan, :diaChi)";
+        $sql = "INSERT INTO HoaDon (ngayTao, tongSoLuong, tongTien, maTK, trangThai, thanhToan, diaChi, soDienThoai) 
+                VALUES (:ngayTao, :tongSoLuong, :tongTien, :maTK, :trangThai, :thanhToan, :diaChi, :soDienThoai)";
         $stmt = $this->db->prepare($sql);
         $success = $stmt->execute([
             ':ngayTao' => $ngayTao,
@@ -157,7 +157,8 @@ class Order extends BaseModel {
             ':maTK' => $maTK,
             ':trangThai' => $trangThai, 
             ':thanhToan' => $thanhToan,
-            ':diaChi' => $diaChi,        
+            ':diaChi' => $diaChi,
+            ':soDienThoai' => $soDienThoai ?? null,        
         ]);
         return $success ? $this->db->lastInsertId() : false;
     }
@@ -371,10 +372,10 @@ class Order extends BaseModel {
             $total = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
             
             // Lấy danh sách đơn hàng theo phân trang
-            $sql = "SELECT hd.*, tk.tenTK 
+            $sql = "SELECT hd.*, tk.tenTK, tk.soDT as soDienThoai 
                     FROM HoaDon hd
                     LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
-                    ORDER BY hd.maHD ASC 
+                    ORDER BY hd.ngayTao DESC, hd.maHD DESC 
                     LIMIT :limit OFFSET :offset";
                     
             $stmt = $this->db->prepare($sql);

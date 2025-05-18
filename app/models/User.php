@@ -45,7 +45,7 @@ class User extends BaseModel {
         $this->matKhau = $data['matKhau'] ?? null;
         $this->hoTen = $data['hoTen'] ?? null;
         $this->email = $data['email'] ?? null;
-        $this->soDienThoai = $data['soDienThoai'] ?? null;
+        $this->soDienThoai = $data['soDT'] ?? null;
         $this->diaChi = $data['diaChi'] ?? null;
         $this->maQuyen = $data['maQuyen'] ?? null;
         $this->trangThai = $data['trangThai'] ?? null;
@@ -207,17 +207,13 @@ class User extends BaseModel {
 
     public function updateUser($id, $data) {
         $sql = "UPDATE TaiKhoan SET 
-                hoTen = :hoTen,
-                email = :email,
-                soDienThoai = :soDienThoai,
+                soDT = :soDienThoai,
                 diaChi = :diaChi
                 WHERE maTK = :id";
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':id' => $id,
-            ':hoTen' => $data['hoTen'],
-            ':email' => $data['email'],
             ':soDienThoai' => $data['soDienThoai'],
             ':diaChi' => $data['diaChi']
         ]);

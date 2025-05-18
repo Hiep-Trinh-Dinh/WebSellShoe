@@ -178,18 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (resetButton) {
         resetButton.addEventListener('click', function(e) {
             e.preventDefault();
-            // Xóa tất cả checkbox đã chọn
-            document.querySelectorAll('#filterForm input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            // Đặt lại dropdown
-            document.querySelectorAll('#filterForm select').forEach(select => {
-                select.selectedIndex = 0;
-            });
-            // Giữ lại từ khóa tìm kiếm nếu có
-            const keyword = document.querySelector('#filterForm input[name="keyword"]').value;
-            // Chuyển đến trang lọc với trang = 1 và giữ lại keyword
-            window.location.href = `${BASE_URL}/products/search?page=1${keyword ? '&keyword=' + encodeURIComponent(keyword) : ''}`;
+            // Chuyển hướng về trang hiển thị tất cả sản phẩm
+            window.location.href = `${BASE_URL}/products`;
         });
     }
 });
