@@ -17,9 +17,12 @@ class AdminOrderController extends BaseController {
             $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
             $searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
             $status = isset($_GET['status']) && $_GET['status'] !== '' ? intval($_GET['status']) : null;
+            $sortColumn = isset($_GET['sort']) ? trim($_GET['sort']) : 'ngayTao';
+            $sortOrder = isset($_GET['order']) ? trim($_GET['order']) : 'DESC';
             
             // Debug để kiểm tra dữ liệu đầu vào
-            error_log("AdminOrderController::index - Page: $page, Search: $searchTerm, Status: " . ($status !== null ? $status : 'null'));
+            error_log("AdminOrderController::index - Page: $page, Search: $searchTerm, Status: " . ($status !== null ? $status : 'null') . 
+                      ", Sort: $sortColumn, Order: $sortOrder");
             
             // Định nghĩa các trạng thái đơn hàng
             $orderStatuses = [
@@ -32,15 +35,15 @@ class AdminOrderController extends BaseController {
             // Lấy danh sách đơn hàng theo tìm kiếm hoặc tất cả
             if (!empty($searchTerm)) {
                 // Nếu có từ khóa tìm kiếm, sử dụng phương thức tìm kiếm
-                $result = $this->orderModel->searchOrdersByPhoneOrAddress($searchTerm, $page, 6, $status);
+                $result = $this->orderModel->searchOrdersByPhoneOrAddress($searchTerm, $page, 6, $status, $sortColumn, $sortOrder);
                 error_log("Tìm kiếm với từ khóa: '$searchTerm', trạng thái: " . ($status !== null ? $status : 'tất cả'));
             } else if ($status !== null) {
                 // Nếu chỉ có lọc theo trạng thái, không có tìm kiếm
-                $result = $this->orderModel->getOrdersWithPagination($page, 6, $status);
+                $result = $this->orderModel->getOrdersWithPagination($page, 6, $status, $sortColumn, $sortOrder);
                 error_log("Lọc theo trạng thái: $status");
             } else {
                 // Lấy tất cả đơn hàng
-                $result = $this->orderModel->getOrdersWithPagination($page, 6);
+                $result = $this->orderModel->getOrdersWithPagination($page, 6, null, $sortColumn, $sortOrder);
                 error_log("Lấy tất cả đơn hàng");
             }
             
@@ -55,7 +58,9 @@ class AdminOrderController extends BaseController {
                 'searchTerm' => $searchTerm,
                 'total' => $result['total'],
                 'status' => $status,
-                'orderStatuses' => $orderStatuses
+                'orderStatuses' => $orderStatuses,
+                'sortColumn' => $sortColumn,
+                'sortOrder' => $sortOrder
             ];
             
             $this->view('admin/layouts/main', $data);

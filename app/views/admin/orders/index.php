@@ -100,15 +100,60 @@ function formatStatus($status) {
             <table class="w-full">
                 <thead>
                     <tr class="text-left">
-                        <th class="pb-4">Mã ĐH</th>
+                        <th class="pb-4">
+                            <a href="<?php echo BASE_URL; ?>/admin/orders?<?php echo !empty($searchTerm) ? 'search='.urlencode($searchTerm).'&' : ''; ?><?php echo $status !== null ? 'status='.$status.'&' : ''; ?>sort=maHD&order=<?php echo ($sortColumn == 'maHD' && $sortOrder == 'ASC') ? 'DESC' : 'ASC'; ?>" class="flex items-center">
+                                Mã ĐH
+                                <?php if ($sortColumn == 'maHD'): ?>
+                                    <i class="fas fa-sort-<?php echo $sortOrder == 'ASC' ? 'up' : 'down'; ?> ml-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <th class="pb-4">Khách hàng</th>
-                        <th class="pb-4">Ngày tạo</th>
-                        <th class="pb-4">Số lượng</th>
-                        <th class="pb-4">Tổng tiền</th>
+                        <th class="pb-4">
+                            <a href="<?php echo BASE_URL; ?>/admin/orders?<?php echo !empty($searchTerm) ? 'search='.urlencode($searchTerm).'&' : ''; ?><?php echo $status !== null ? 'status='.$status.'&' : ''; ?>sort=ngayTao&order=<?php echo ($sortColumn == 'ngayTao' && $sortOrder == 'ASC') ? 'DESC' : 'ASC'; ?>" class="flex items-center">
+                                Ngày tạo
+                                <?php if ($sortColumn == 'ngayTao'): ?>
+                                    <i class="fas fa-sort-<?php echo $sortOrder == 'ASC' ? 'up' : 'down'; ?> ml-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="pb-4">
+                            <a href="<?php echo BASE_URL; ?>/admin/orders?<?php echo !empty($searchTerm) ? 'search='.urlencode($searchTerm).'&' : ''; ?><?php echo $status !== null ? 'status='.$status.'&' : ''; ?>sort=tongSoLuong&order=<?php echo ($sortColumn == 'tongSoLuong' && $sortOrder == 'ASC') ? 'DESC' : 'ASC'; ?>" class="flex items-center">
+                                Số lượng
+                                <?php if ($sortColumn == 'tongSoLuong'): ?>
+                                    <i class="fas fa-sort-<?php echo $sortOrder == 'ASC' ? 'up' : 'down'; ?> ml-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="pb-4">
+                            <a href="<?php echo BASE_URL; ?>/admin/orders?<?php echo !empty($searchTerm) ? 'search='.urlencode($searchTerm).'&' : ''; ?><?php echo $status !== null ? 'status='.$status.'&' : ''; ?>sort=tongTien&order=<?php echo ($sortColumn == 'tongTien' && $sortOrder == 'ASC') ? 'DESC' : 'ASC'; ?>" class="flex items-center">
+                                Tổng tiền
+                                <?php if ($sortColumn == 'tongTien'): ?>
+                                    <i class="fas fa-sort-<?php echo $sortOrder == 'ASC' ? 'up' : 'down'; ?> ml-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <th class="pb-4">Thanh toán</th>
                         <th class="pb-4">Số điện thoại</th>
                         <th class="pb-4">Địa chỉ</th>
-                        <th class="pb-4">Trạng thái</th>
+                        <th class="pb-4">
+                            <a href="<?php echo BASE_URL; ?>/admin/orders?<?php echo !empty($searchTerm) ? 'search='.urlencode($searchTerm).'&' : ''; ?><?php echo $status !== null ? 'status='.$status.'&' : ''; ?>sort=trangThai&order=<?php echo ($sortColumn == 'trangThai' && $sortOrder == 'ASC') ? 'DESC' : 'ASC'; ?>" class="flex items-center">
+                                Trạng thái
+                                <?php if ($sortColumn == 'trangThai'): ?>
+                                    <i class="fas fa-sort-<?php echo $sortOrder == 'ASC' ? 'up' : 'down'; ?> ml-1"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-sort ml-1 text-gray-400"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <th class="pb-4">Thao tác</th>
                     </tr>
                 </thead>
@@ -161,11 +206,11 @@ function formatStatus($status) {
         </div>
         
         <!-- Phân trang -->
-        <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
+        <?php if (isset($totalPages) && $totalPages > 1): ?>
         <div class="flex justify-center mt-6">
             <nav class="flex items-center space-x-2">
-                <?php if ($pagination['currentPage'] > 1): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] - 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
+                <?php if ($currentPage > 1): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $currentPage - 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo $status !== null ? '&status='.$status : ''; ?><?php echo isset($sortColumn) ? '&sort='.$sortColumn : ''; ?><?php echo isset($sortOrder) ? '&order='.$sortOrder : ''; ?>" 
                        class="px-3 py-1 rounded border hover:bg-gray-100">
                         <i class="fas fa-chevron-left"></i>
                     </a>
@@ -173,8 +218,8 @@ function formatStatus($status) {
                 
                 <?php
                 // Hiển thị số trang
-                $startPage = max(1, $pagination['currentPage'] - 2);
-                $endPage = min($pagination['totalPages'], $startPage + 4);
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $startPage + 4);
                 
                 if ($endPage - $startPage < 4 && $startPage > 1) {
                     $startPage = max(1, $endPage - 4);
@@ -182,14 +227,14 @@ function formatStatus($status) {
                 
                 for ($i = $startPage; $i <= $endPage; $i++):
                 ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $i; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
-                       class="px-3 py-1 rounded border <?php echo $i == $pagination['currentPage'] ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $i; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo $status !== null ? '&status='.$status : ''; ?><?php echo isset($sortColumn) ? '&sort='.$sortColumn : ''; ?><?php echo isset($sortOrder) ? '&order='.$sortOrder : ''; ?>" 
+                       class="px-3 py-1 rounded border <?php echo $i == $currentPage ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'; ?>">
                         <?php echo $i; ?>
                     </a>
                 <?php endfor; ?>
                 
-                <?php if ($pagination['currentPage'] < $pagination['totalPages']): ?>
-                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $pagination['currentPage'] + 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo !empty($status) ? '&status='.$status : ''; ?>" 
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="<?php echo BASE_URL; ?>/admin/orders?page=<?php echo $currentPage + 1; ?><?php echo !empty($searchTerm) ? '&search='.urlencode($searchTerm) : ''; ?><?php echo $status !== null ? '&status='.$status : ''; ?><?php echo isset($sortColumn) ? '&sort='.$sortColumn : ''; ?><?php echo isset($sortOrder) ? '&order='.$sortOrder : ''; ?>" 
                        class="px-3 py-1 rounded border hover:bg-gray-100">
                         <i class="fas fa-chevron-right"></i>
                     </a>

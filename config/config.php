@@ -6,7 +6,7 @@ define('DB_PASS', '');
 define('DB_NAME', 'web_ban_giay');
 
 // Base URL Configuration
-define('BASE_URL', 'http://localhost:8080/Web2/');
+define('BASE_URL', 'http://localhost/Web2/');
 
 // Error Reporting
 error_reporting(E_ALL);

@@ -360,7 +360,7 @@ class Order extends BaseModel {
         }
     }
 
-    public function getOrdersWithPagination($page = 1, $limit = 6, $status = null) {
+    public function getOrdersWithPagination($page = 1, $limit = 6, $status = null, $sortColumn = 'ngayTao', $sortOrder = 'DESC') {
         try {
             // Tính offset
             $offset = ($page - 1) * $limit;
@@ -374,6 +374,18 @@ class Order extends BaseModel {
                 $whereClause = ' WHERE hd.trangThai = :status';
                 $params[':status'] = $status;
                 error_log("Lọc đơn hàng theo trạng thái: $status");
+            }
+            
+            // Xác thực cột sắp xếp để tránh SQL injection
+            $allowedColumns = ['maHD', 'ngayTao', 'tongSoLuong', 'tongTien', 'trangThai'];
+            if (!in_array($sortColumn, $allowedColumns)) {
+                $sortColumn = 'ngayTao'; // Mặc định sắp xếp theo ngày tạo
+            }
+            
+            // Xác thực hướng sắp xếp
+            $sortOrder = strtoupper($sortOrder);
+            if ($sortOrder != 'ASC' && $sortOrder != 'DESC') {
+                $sortOrder = 'DESC'; // Mặc định giảm dần
             }
             
             // Lấy tổng số đơn hàng
@@ -396,7 +408,7 @@ class Order extends BaseModel {
                     FROM HoaDon hd
                     LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK"
                     . $whereClause . 
-                   " ORDER BY hd.ngayTao DESC, hd.maHD DESC 
+                   " ORDER BY hd.{$sortColumn} {$sortOrder}, hd.maHD DESC 
                     LIMIT :limit OFFSET :offset";
                     
             error_log("SQL query: $sql");
@@ -426,7 +438,9 @@ class Order extends BaseModel {
                 'total' => $total,
                 'totalPages' => ceil($total / $limit),
                 'currentPage' => $page,
-                'status' => $status
+                'status' => $status,
+                'sortColumn' => $sortColumn,
+                'sortOrder' => $sortOrder
             ];
         } catch (PDOException $e) {
             error_log("Error in getOrdersWithPagination: " . $e->getMessage());
@@ -439,7 +453,9 @@ class Order extends BaseModel {
                 'total' => 0,
                 'totalPages' => 1,
                 'currentPage' => 1,
-                'status' => $status
+                'status' => $status,
+                'sortColumn' => $sortColumn,
+                'sortOrder' => $sortOrder
             ];
         }
     }
@@ -878,7 +894,7 @@ class Order extends BaseModel {
         }
     }
 
-    public function searchOrdersByPhoneOrAddress($searchTerm, $page = 1, $limit = 6, $status = null) {
+    public function searchOrdersByPhoneOrAddress($searchTerm, $page = 1, $limit = 6, $status = null, $sortColumn = 'ngayTao', $sortOrder = 'DESC') {
         try {
             // Debug để kiểm tra từ khóa tìm kiếm và trạng thái
             error_log("Tìm kiếm với từ khóa: " . $searchTerm . ", trạng thái: " . ($status !== null ? $status : 'tất cả'));
@@ -960,6 +976,18 @@ class Order extends BaseModel {
                 $whereClause = "WHERE " . implode(" AND ", $whereConditions);
             }
             
+            // Xác thực cột sắp xếp để tránh SQL injection
+            $allowedColumns = ['maHD', 'ngayTao', 'tongSoLuong', 'tongTien', 'trangThai'];
+            if (!in_array($sortColumn, $allowedColumns)) {
+                $sortColumn = 'ngayTao'; // Mặc định sắp xếp theo ngày tạo
+            }
+            
+            // Xác thực hướng sắp xếp
+            $sortOrder = strtoupper($sortOrder);
+            if ($sortOrder != 'ASC' && $sortOrder != 'DESC') {
+                $sortOrder = 'DESC'; // Mặc định giảm dần
+            }
+            
             // Truy vấn tìm kiếm đơn hàng để lấy số lượng tổng
             $countSql = "
                 SELECT COUNT(DISTINCT hd.maHD) as total 
@@ -986,7 +1014,7 @@ class Order extends BaseModel {
                 FROM HoaDon hd
                 LEFT JOIN TaiKhoan tk ON hd.maTK = tk.maTK
                 $whereClause
-                ORDER BY hd.ngayTao DESC, hd.maHD DESC
+                ORDER BY hd.{$sortColumn} {$sortOrder}, hd.maHD DESC
                 LIMIT :limit OFFSET :offset
             ";
             
@@ -1035,7 +1063,9 @@ class Order extends BaseModel {
                 'total' => $totalRows,
                 'totalPages' => ceil($totalRows / $limit),
                 'currentPage' => $page,
-                'status' => $status
+                'status' => $status,
+                'sortColumn' => $sortColumn,
+                'sortOrder' => $sortOrder
             ];
         } catch (PDOException $e) {
             error_log("Error in searchOrdersByPhoneOrAddress: " . $e->getMessage());
@@ -1048,7 +1078,9 @@ class Order extends BaseModel {
                 'total' => 0,
                 'totalPages' => 1,
                 'currentPage' => 1,
-                'status' => $status
+                'status' => $status,
+                'sortColumn' => $sortColumn, 
+                'sortOrder' => $sortOrder
             ];
         }
     }
