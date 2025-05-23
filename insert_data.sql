@@ -24,11 +24,12 @@ INSERT INTO Quyen (tenQuyen) VALUES
 ('User');
 
 -- Thêm dữ liệu cho bảng TaiKhoan
+-- 123456 ~ e10adc3949ba59abbe56e057f20f883e
 INSERT INTO TaiKhoan (tenTK, matKhau, maQuyen, trangThai) VALUES
-('admin', '123456', 1, 1),
-('user1', '123456', 2, 1),
-('user2', '123456', 2, 1),
-('user3', '123456', 2, 0); -- Tài khoản bị khóa
+('admin', 'e10adc3949ba59abbe56e057f20f883e', 1, 1),
+('user1', 'e10adc3949ba59abbe56e057f20f883e', 2, 1),
+('user2', 'e10adc3949ba59abbe56e057f20f883e', 2, 1),
+('user3', 'e10adc3949ba59abbe56e057f20f883e', 2, 0); -- Tài khoản bị khóa
 
 -- Thêm dữ liệu cho bảng NhaCungCap
 INSERT INTO NhaCungCap (tenNCC, email, diaChi) VALUES
