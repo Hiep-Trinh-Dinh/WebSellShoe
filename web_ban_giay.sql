@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS TaiKhoan (
     maTK INT AUTO_INCREMENT PRIMARY KEY,
     tenTK VARCHAR(50),
     matKhau VARCHAR(50),
+    hoTen VARCHAR(50),
+    email VARCHAR(50),
+    soDienThoai VARCHAR(50),
+    diaChi VARCHAR(50),
     maQuyen INT,
     trangThai INT DEFAULT 1,
     FOREIGN KEY (maQuyen) REFERENCES Quyen(maQuyen) ON DELETE CASCADE

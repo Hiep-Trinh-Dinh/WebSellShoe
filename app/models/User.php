@@ -45,7 +45,7 @@ class User extends BaseModel {
         $this->matKhau = $data['matKhau'] ?? null;
         $this->hoTen = $data['hoTen'] ?? null;
         $this->email = $data['email'] ?? null;
-        $this->soDienThoai = $data['soDT'] ?? null;
+        $this->soDienThoai = $data['soDienThoai'] ?? null;
         $this->diaChi = $data['diaChi'] ?? null;
         $this->maQuyen = $data['maQuyen'] ?? null;
         $this->trangThai = $data['trangThai'] ?? null;
@@ -193,7 +193,7 @@ class User extends BaseModel {
 
             // Đảm bảo các trường không bị null
             $user['email'] = $user['email'] ?? '';
-            $user['soDT'] = $user['soDT'] ?? '';
+            $user['soDienThoai'] = $user['soDienThoai'] ?? '';
             $user['diaChi'] = $user['diaChi'] ?? '';
             
             return $user;
@@ -207,7 +207,7 @@ class User extends BaseModel {
 
     public function updateUser($id, $data) {
         $sql = "UPDATE TaiKhoan SET 
-                soDT = :soDienThoai,
+                soDienThoai = :soDienThoai,
                 diaChi = :diaChi
                 WHERE maTK = :id";
         
